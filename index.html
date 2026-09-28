@@ -1,0 +1,2468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Swiss Tomato — Enterprise-grade websites built to perform and scale.</title>
+<meta name="description" content="Web design &amp; development agency in Geneva &amp; Zürich. WordPress, Drupal and custom builds engineered by a senior, independent studio.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wdth,wght,GRAD,ROND@6..144,25..151,1..1000,0..100,0..100&display=swap" rel="stylesheet">
+
+<style>
+/* ================================================================
+   SWISS TOMATO — LANDING PAGE
+   Built from Figma (swisstomato.ch website, node 8534:3680)
+   Animation language modeled on stodio.webflow.io: Lenis smooth
+   scroll + scroll-triggered reveals (opacity/move/scale), hover
+   states, marquee loops, odometer stats.
+   ================================================================ */
+
+:root{
+  --red:#f2000c;
+  --ink:#0a0a0a;
+  --ink-70: rgba(10,10,10,.7);
+  --ink-80: rgba(10,10,10,.8);
+  --paper:#eef0f6;
+  --purple:#e5daf6;
+  --blue:#dae9f6;
+  --green:#e2f7b8;
+  --white:#ffffff;
+  --line: rgba(10,10,10,.15);
+  --container: 1408px;
+  --frame: 1440px;
+  --gutter: min(4vw, 16px);
+  --radius-lg: 20px;
+  --radius-xl: 24px;
+  --ff: 'Google Sans Flex', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --ease: cubic-bezier(.16,.84,.44,1);
+  --ease-soft: cubic-bezier(.22,1,.36,1);
+}
+
+*,*::before,*::after{ box-sizing:border-box; }
+html{ scroll-behavior:auto; }
+html.lenis, html.lenis body{ height:auto; }
+.lenis.lenis-smooth{ scroll-behavior:auto !important; }
+.lenis.lenis-stopped{ overflow:hidden; }
+
+body{
+  margin:0;
+  font-family:var(--ff);
+  color:var(--ink);
+  background:var(--white);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  overflow-x:clip;
+  font-feature-settings:"ss01" 1;
+  font-variation-settings:"GRAD" 0,"ROND" 0,"wdth" 100;
+}
+
+img,svg{ display:block; max-width:100%; }
+a{ color:inherit; text-decoration:none; }
+ul{ margin:0; padding:0; }
+button{ font-family:inherit; border:none; background:none; cursor:pointer; color:inherit; }
+
+.wrap{
+  max-width: var(--frame);
+  margin-inline:auto;
+  padding-inline: var(--gutter);
+}
+/* narrower inner containers used by Stats (1316px) and Why Us (1296px) at desktop,
+   matching Figma's own container widths for these two sections */
+.wrap-stats{ padding-inline: calc(var(--gutter) + 46px); }
+.wrap-whyus{ padding-inline: calc(var(--gutter) + 56px); }
+.wrap-pad-32{ padding-inline: calc(var(--gutter) + 32px); }
+.wrap-pad-16{ padding-inline: calc(var(--gutter) + 16px); }
+
+::selection{ background:var(--red); color:var(--white); }
+
+/* ---------- reveal targets: hidden until JS reveals them ---------- */
+[data-reveal]{
+  opacity:0;
+  transform: translateY(46px);
+  will-change: transform, opacity;
+}
+.no-js [data-reveal]{ opacity:1; transform:none; }
+
+/* ---------- custom cursor (desktop / fine pointer only) ----------
+   modelled on arturospatino.com: a 16px dot easing after the pointer plus a faint
+   40px "shadow" ring trailing it on a spring; both white under mix-blend exclusion,
+   so they invert against whatever is underneath (black on light, white on dark). */
+.cursor{
+  position:fixed; inset:0; z-index:9999;
+  pointer-events:none; mix-blend-mode:exclusion;
+}
+.cursor-dot, .cursor-trail{
+  position:fixed; top:0; left:0; border-radius:50%;
+  pointer-events:none; opacity:0; will-change:transform;
+}
+.cursor-dot{
+  width:16px; height:16px; background:#fff;
+  display:flex; align-items:center; justify-content:center;
+  transition: width .18s ease-out, height .18s ease-out, opacity .18s ease-out;
+}
+/* arrow inside the dot, only over media links (ulrychkristian.cz's link cursor): a thin
+   stroked arrow at half the disc's size, fading/scaling in from .6 over .18s; black on
+   the white disc, so under the blend the arrow shows the image untouched */
+.cursor-arrow{
+  width:50%; height:50%; opacity:0; transform:scale(.6);
+  transition: opacity .18s ease-out, transform .18s ease-out;
+}
+.cursor-trail{
+  width:40px; height:40px; background:#fff;
+  transition: opacity .2s ease-out;
+}
+.cursor.is-visible .cursor-dot{ opacity:1; }
+.cursor.is-visible .cursor-trail{ opacity:.25; }
+.cursor.is-hover .cursor-dot{ width:44px; height:44px; }
+/* over image cards ([data-cursor="media"]): the dot swells into a 96px disc with an arrow,
+   blended with difference; the curve approximates their spring (stiffness 320, damping 28) */
+.cursor.is-media{ mix-blend-mode:difference; }
+.cursor.is-media .cursor-dot{
+  width:96px; height:96px;
+  transition: width .5s cubic-bezier(.34,1.32,.64,1), height .5s cubic-bezier(.34,1.32,.64,1), opacity .18s ease-out;
+}
+.cursor.is-media .cursor-arrow{ opacity:1; transform:scale(1); }
+/* over carousels the arrow points along the swipe: right half of the viewport -> right,
+   left half -> left (clicking there moves the carousel that way) */
+.cursor.is-carousel .cursor-arrow{ transform:scale(1) rotate(45deg); }
+.cursor.is-carousel.is-left .cursor-arrow{ transform:scale(1) rotate(-135deg); }
+.cursor.is-media .cursor-trail{ opacity:0; }
+@media (hover:none), (pointer:coarse){ .cursor{ display:none; } }
+/* hide the native pointer wherever the custom cursor is active */
+@media (hover:hover) and (pointer:fine){ html, html *{ cursor:none !important; } }
+
+/* ---------- image reveal (modelled on bb-b.net) ----------
+   a cover in the surrounding background colour sits over the image and slides down
+   off it (1s, in-out) while the block rises 30px and fades in (.6s, .2s later).
+   data-img-reveal="cover" = wipe only, for images whose parent already animates in.
+   The cover element is injected by JS. */
+[data-img-reveal]:not([data-img-reveal="cover"]){ opacity:0; transform:translateY(30px); }
+.no-js [data-img-reveal]{ opacity:1; transform:none; }
+.img-reveal-cover{ position:absolute; inset:0; z-index:5; pointer-events:none; will-change:transform; }
+
+/* ---------- split headings (JS) ----------
+   [data-split]: words rise, un-blurring, out of their own overflow-hidden mask.
+   Hidden until split so the unsplit text never flashes. */
+/* [data-split-lead] (a red eyebrow) is split too and plays in the same cascade as the
+   heading that follows it */
+[data-split], [data-split-lead]{ visibility:hidden; }
+[data-split].is-split, [data-split-lead].is-split{ visibility:visible; }
+[data-split] .word-mask, [data-split-lead] .word-mask{
+  display:inline-block; overflow:hidden; vertical-align:top;
+  padding-bottom:calc(.2em + 2px); margin-bottom:calc(-.2em - 2px); /* room for descenders (g, p) */
+}
+[data-split] .word, [data-split-lead] .word{ display:inline-block; will-change:transform; } /* start offset set by JS */
+
+/* ---------- slide-in from the right (JS) ---------- */
+[data-slide-in]{ opacity:0; }
+.no-js [data-slide-in]{ opacity:1; }
+
+/* ---------- progress bar ---------- */
+.scroll-progress{
+  position:fixed; top:0; left:0; height:3px; width:100%;
+  background:var(--red); transform-origin:0 50%; transform:scaleX(0);
+  z-index:10000; pointer-events:none;
+}
+
+/* =========================== NAV =========================== */
+/* absolute, not fixed: the nav sits over the hero and scrolls away with it
+   (the sticky frosted variant is switched off in JS for now) */
+.site-nav{
+  position:absolute; top:0; left:0; right:0; z-index:1000;
+  padding: clamp(16px,2.5vw,32px) 0 0;
+  transition: padding .45s var(--ease-soft);
+}
+.nav-inner{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:24px;
+  /* lines up with the hero: same 1500px frame + the hero's inner padding */
+  max-width:calc(1500px + 2 * var(--gutter));
+  padding: 28px calc(var(--gutter) + clamp(24px,4vw,48px)) 10px;
+  border-radius:100px;
+  transition: background-color .45s var(--ease-soft), backdrop-filter .45s var(--ease-soft), box-shadow .45s var(--ease-soft), padding .45s var(--ease-soft);
+}
+.site-nav.is-stuck{ padding-top:14px; }
+.site-nav.is-stuck .nav-inner{
+  background:rgba(255,255,255,.72);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  box-shadow: 0 10px 30px -12px rgba(10,10,10,.18);
+  padding: 8px 8px 8px 20px;
+}
+.site-nav.nav-hidden{ transform: translateY(-130%); }
+
+.logo{
+  display:flex; align-items:center; color:#fff; white-space:nowrap;
+  transition: color .3s var(--ease-soft);
+}
+.site-nav.is-stuck .logo{ color:var(--ink); }
+.logo svg{ display:block; width:158px; height:auto; color:inherit; }
+footer .logo svg{ width:150px; }
+
+.nav-links{
+  display:flex; align-items:center; gap:32px;
+  list-style:none; margin:0; padding:0;
+}
+.nav-links a{
+  font-size:18px; font-weight:500; letter-spacing:-.5px;
+  color:rgba(255,255,255,.7); position:relative; padding:4px 0;
+  transition:color .3s var(--ease-soft);
+}
+.site-nav.is-stuck .nav-links a{ color: rgba(10,10,10,.62); }
+.nav-links a:hover, .nav-links a.is-active{ color:#fff; }
+.site-nav.is-stuck .nav-links a:hover, .site-nav.is-stuck .nav-links a.is-active{ color:var(--ink); }
+.nav-links a::after{
+  content:''; position:absolute; left:0; right:0; bottom:-6px; height:2px;
+  background:currentColor; border-radius:2px;
+  transform:scaleX(0); transform-origin:right center;
+  transition:transform .6s cubic-bezier(.77,0,.18,1);
+}
+.nav-links a:hover::after, .nav-links a.is-active::after{ transform:scaleX(1); transform-origin:left center; }
+
+.nav-right{ display:flex; align-items:center; gap:16px; }
+.lang{ font-size:15px; font-weight:500; letter-spacing:-.5px; color:rgba(255,255,255,.8); }
+.site-nav.is-stuck .lang{ color:var(--ink-70); }
+
+.btn{
+  --btn-fg: var(--ink);
+  --btn-bg: #fff;
+  display:inline-flex; align-items:center; gap:10px;
+  height:48px; padding:0 20px; border-radius:999px;
+  background:var(--btn-bg); color:var(--btn-fg);
+  font-weight:600; font-size:17px; letter-spacing:-.5px;
+  white-space:nowrap; position:relative; isolation:isolate;
+  /* hover: a quick springy shrink (overshooting ease), a touch more while pressed */
+  transition: transform .55s cubic-bezier(.34,1.56,.64,1);
+}
+.btn:hover{ transform:scale(.94); }
+.btn:active{ transform:scale(.9); transition-duration:.2s; }
+.btn .icon-arrow{ width:16px; height:16px; display:inline-block; transition:transform .4s ease; }
+/* hover modelled on novacraft-template.webflow.io's primary button (400ms ease):
+   the label rolls up and a copy rolls in from below, the arrow turns 45deg, and in a
+   .header-cta pair the arrow button slides 16px towards the label. Pairs react as one. */
+.btn-label{ position:relative; display:inline-block; overflow:hidden; line-height:1.2; }
+.btn-label > span{ display:block; transition:transform .4s ease; }
+.btn-label > span + span{ position:absolute; left:0; top:0; transform:translateY(110%); }
+.btn:hover .btn-label > span, .header-cta:hover .btn-label > span{ transform:translateY(-110%); }
+.btn:hover .btn-label > span + span, .header-cta:hover .btn-label > span + span{ transform:translateY(0); }
+.btn:hover .icon-arrow, .header-cta:hover .icon-arrow{ transform:rotate(45deg); }
+.btn.btn-red{ --btn-fg:#fff; --btn-bg:var(--red); }
+.btn.btn-arrow{ width:48px; padding:0; justify-content:center; border-radius:48px; }
+.header-cta{ display:flex; align-items:center; }
+/* gap cannot be negative, so the overlap comes from a negative margin; the arrow comes later in the DOM and paints on top */
+.header-cta .btn-arrow{ margin-left:-4px; transition: transform .2s var(--ease-soft), translate .4s ease; }
+.header-cta:hover .btn-arrow{ translate:-16px 0; }
+
+.burger{
+  display:none; width:48px; height:48px; border-radius:50%;
+  align-items:center; justify-content:center; background:#fff; flex:none;
+  position:relative; z-index:1301;
+}
+.burger span, .burger span::before, .burger span::after{
+  content:''; display:block; width:18px; height:2px; background:var(--ink);
+  position:relative; transition: transform .3s var(--ease-soft), opacity .2s;
+}
+.burger span::before{ position:absolute; top:-6px; }
+.burger span::after{ position:absolute; top:6px; }
+.burger.is-open span{ background:transparent; }
+.burger.is-open span::before{ top:0; transform:rotate(45deg); }
+.burger.is-open span::after{ top:0; transform:rotate(-45deg); }
+
+.mobile-menu{
+  position:fixed; inset:0; z-index:1200;
+  background:var(--ink); color:#fff;
+  clip-path: circle(0px at calc(100% - 40px) 40px);
+  transition: clip-path .6s var(--ease-soft);
+  display:flex; align-items:center; justify-content:center;
+  pointer-events:none;
+}
+.mobile-menu.is-open{ clip-path: circle(150% at calc(100% - 40px) 40px); pointer-events:auto; }
+.mobile-menu ul{ list-style:none; text-align:center; display:flex; flex-direction:column; gap:22px; }
+.mobile-menu a{ font-size:clamp(28px,7vw,44px); font-weight:600; letter-spacing:-.02em; }
+
+/* =========================== HERO =========================== */
+.hero{
+  position:relative;
+  padding: 0;
+  min-height:100vh;
+  display:flex; flex-direction:column;
+}
+.hero-frame{
+  position:relative;
+  width:calc(100% - 2 * var(--gutter)); max-width:1500px;
+  margin: 20px auto 0;
+  border-radius: 28px;
+  overflow:hidden;
+  background: #050506;
+  flex:1;
+  display:flex; flex-direction:column;
+}
+.hero-bg{ position:absolute; inset:0; overflow:hidden; }
+.hero-shade{ position:absolute; inset:0; z-index:5; background:#000; opacity:0; pointer-events:none; }
+.hero-bg img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; transform:scale(1.4); will-change:transform; }
+/* hero entrance start state (modelled on stodio.webflow.io): texts wait blurred 5px and
+   50px low, the mockup 1.2x oversized, the background 1.4x; the JS timeline settles them */
+.hero [data-reveal]{ filter:blur(5px); transform:translateY(50px); }
+.hero .hero-mock[data-reveal]{ transform:scale(1.2); }
+.hero .clients-bar[data-reveal]{ filter:none; }
+/* hero headline: the word-split animation replaces the generic blur-rise */
+.hero .hero-headline[data-reveal]{ opacity:1; filter:none; transform:none; }
+.no-js .hero-bg img, .no-js .hero [data-reveal]{ filter:none; transform:none; }
+.no-js [data-split], .no-js [data-split-lead]{ visibility:visible; }
+
+.hero-inner{
+  position:relative; z-index:2;
+  flex:1; display:flex; align-items:center;
+  padding: 0 clamp(24px,4vw,48px) clamp(32px,5vw,48px);
+  padding-top: clamp(110px,9vw,130px);
+}
+.hero-grid{
+  width:100%;
+  display:grid; grid-template-columns: minmax(0,734px) 1fr; gap:40px; align-items:start;
+}
+.hero-text{ position:relative; z-index:2; display:flex; flex-direction:column; gap:30px; }
+.hero-eyebrow{
+  font-size:13px; text-transform:uppercase; letter-spacing:.08em;
+  color:rgba(255,255,255,.9); margin:0;
+}
+.hero-headline{
+  position:relative;
+  font-size:clamp(2.4rem, 1.15rem + 4.6vw, 4.75rem);
+  font-weight:541; letter-spacing:-2px; line-height:1.05; color:#fff;
+  margin:0; max-width:734px;
+}
+.hero-headline .stroke{
+  position:absolute; left:-9px; width:280px; max-width:60%; height:auto; bottom:-10px;
+  clip-path: inset(0 100% 0 0);
+}
+.hero-desc{
+  font-size:18px; line-height:1.55; color:rgba(255,255,255,.9);
+  max-width:496px; margin:0;
+}
+/* laptop bleeds off the right edge of the frame and slightly under the text column;
+   margin-top % resolves against width, so -23.2% = half the image's height (72.3% * 658/1024 / 2) */
+.hero-mock{
+  position:absolute; z-index:1; pointer-events:none;
+  left:39.4%; width:72.3%;
+  top:50%; margin-top:calc(-23.2% + 40px);
+}
+.hero-mock img{
+  display:block; width:100%; height:auto;
+  filter: drop-shadow(0 40px 90px rgba(0,0,0,.65));
+}
+
+/* clients bar — sits below the dark hero card, on the page's white bg */
+.clients-bar{
+  display:flex; align-items:center; gap:64px;
+  margin: 52px var(--gutter) 0;
+  padding-inline: 54px;
+}
+.clients-bar .cb-label{
+  font-size:16px; font-weight:600; letter-spacing:-.5px;
+  color:rgba(10,10,10,.8); max-width:200px; min-width:156px; flex:1; line-height:1.4;
+}
+.marquee{ overflow:hidden; flex:3; min-width:0; mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent); }
+.marquee-track{ display:flex; align-items:center; width:max-content; gap:56px; animation: marquee 120s linear infinite; padding:14.448px 0; }
+.marquee-track img{
+  height:75px; width:auto; flex:none;
+  filter: brightness(0); opacity:1; transition:opacity .3s;
+}
+.marquee-track img:hover{ opacity:1; }
+@keyframes marquee{ from{ transform:translateX(0);} to{ transform:translateX(-50%);} }
+
+/* =========================== AWARDS WALL ===========================
+   modelled on moto-card.com's ".numbers" section (a three.js shader there), rebuilt in
+   plain DOM inside a grey panel. The section scrolls normally; the award columns fill
+   its height, so they run past at scroll speed while JS bends each item onto a ")("
+   arc around the viewport's vertical centre, nudges the middle item towards the text
+   and scales it up, and keeps a diagonal grey/white/grey gradient fixed to the screen
+   under the clipped text so items "catch the light" as they pass. */
+.awards-wall{ position:relative; height:125vh; overflow:hidden; }
+.aw-content{
+  position:relative; z-index:3; height:100%;
+  display:grid; grid-template-rows:.7fr auto 1.15fr auto .85fr; justify-items:center; text-align:center;
+  padding-inline:var(--gutter); pointer-events:none;
+}
+.aw-head{ grid-row:2; display:flex; flex-direction:column; align-items:center; }
+.aw-head .eyebrow{ margin:0 0 10px; }
+.aw-title{
+  margin:0; max-width:609px; color:var(--ink);
+  font-size:clamp(34px, 1.2rem + 3vw, 60px); font-weight:541; line-height:1.1; letter-spacing:-2px;
+}
+.aw-sub{ grid-row:4; margin:0; display:flex; flex-direction:column; align-items:center; gap:.75em; line-height:1.2; }
+/* each line rises out of a blur on its own (moto-card's .numbers_list) */
+.aw-line{ display:block; }
+[data-lines-in] .aw-line{ opacity:0; filter:blur(5px); transform:translateY(110%); }
+.no-js [data-lines-in] .aw-line{ opacity:1; filter:none; transform:none; }
+[data-blur-in]{ opacity:0; filter:blur(5px); transform:translateY(60%); }
+.no-js [data-blur-in]{ opacity:1; filter:none; transform:none; }
+/* columns hug the text: their inner edge is where the middle item lands */
+.aw-track{ position:absolute; top:0; width:240px; }
+.aw-track.is-left{ right:calc(50% + 250px); }
+.aw-track.is-right{ left:calc(50% + 250px); }
+.aw-track.is-right .aw-list{ margin-top:-54px; } /* columns run half an item apart */
+.aw-list{ list-style:none; margin:0; padding:0; }
+.aw-item{
+  display:flex; flex-direction:column; align-items:center; text-align:center;
+  width:max-content; padding-inline:6px; /* box must fit the text: background-clip:text only paints inside it */
+  height:108px; justify-content:center;
+  font-weight:500; letter-spacing:-.5px; white-space:nowrap;
+  color:#bcc0ca; /* fallback until JS paints the shine */
+  will-change:transform;
+}
+.aw-shine .aw-item{
+  color:transparent; -webkit-background-clip:text; background-clip:text;
+  background-image:var(--aw-shine, linear-gradient(231deg, #bcc0ca 30%, #ffffff 48%, #bcc0ca 66%));
+  background-repeat:no-repeat;
+}
+.aw-track.is-left .aw-item{ transform-origin:right center; margin-left:auto; }
+.aw-track.is-right .aw-item{ transform-origin:left center; }
+.aw-org, .aw-meta{ font-size:19px; line-height:1.3; }
+.aw-name{ font-size:36px; line-height:1.1; }
+.aw-fade{ position:absolute; left:0; right:0; height:18vh; z-index:2; pointer-events:none; }
+.aw-fade.is-top{ top:0; background:linear-gradient(var(--paper), rgba(238,240,246,0)); }
+.aw-fade.is-bottom{ bottom:0; background:linear-gradient(rgba(238,240,246,0), var(--paper)); }
+@media (max-width:760px){
+  .aw-track{ width:150px; }
+  .aw-track.is-left{ right:calc(50% + 60px); }
+  .aw-track.is-right{ left:calc(50% + 60px); }
+  .aw-track.is-right .aw-list{ margin-top:-39px; }
+  .aw-item{ height:78px; }
+  .aw-org, .aw-meta{ font-size:12px; }
+  .aw-name{ font-size:22px; }
+}
+
+/* =========================== SECTION SHELL =========================== */
+section{ position:relative; }
+.section{ padding: clamp(32px,4vw,55px) 0; }
+.section-tight{ padding-block: clamp(28px,4vw,50px); }
+.eyebrow{
+  font-size:15px; font-weight:500; text-transform:uppercase; letter-spacing:.04em; color:var(--red);
+  margin:0 0 14px;
+}
+.h2{ font-size:clamp(2rem, 1rem + 3.2vw, 3.75rem); font-weight:541; letter-spacing:-2px; line-height:1.1; margin:0; }
+.h3{ font-size:clamp(1.7rem, .9rem + 2.4vw, 2.75rem); font-weight:541; letter-spacing:-2px; line-height:1.1; margin:0; }
+.lede{ font-size:18px; line-height:1.6; color:var(--ink-80); }
+
+/* ---------- Services ---------- */
+.services-head{ display:flex; align-items:flex-end; justify-content:space-between; gap:24px; flex-wrap:wrap; margin-bottom:44px; }
+.services-head .h2{ max-width:20ch; }
+.services-cards{ display:grid; grid-template-columns: 522fr 373fr 373fr; gap:24px; }
+@media (max-width:900px){ .services-cards{ grid-template-columns:1fr; } }
+.service-card{
+  position:relative; border-radius:var(--radius-lg); overflow:hidden;
+  height:400px; padding:32px; display:flex; flex-direction:column; justify-content:space-between; align-items:flex-start;
+  color:#fff; isolation:isolate;
+}
+/* Figma nudges the custom card's content a few px off the 32px grid */
+.service-card.custom{ padding:23px 32px 26px 22px; }
+.service-card.custom h4{ margin-left:5px; }
+.service-card h4{
+  margin:0; max-width:323px;
+  font-size:clamp(26px,1rem + 1.4vw,35px); font-weight:600; letter-spacing:-.5px; line-height:1.1;
+  font-variation-settings:"GRAD" 0,"ROND" 0,"wdth" 100;
+}
+.service-card .icon{ display:block; height:auto; }
+.service-card.wp .icon{ width:75.5px; }
+.service-card.drupal .icon{ width:59.3px; }
+.service-card.custom .icon{ width:96.1px; }
+
+/* hover: the image drifts opposite to the pointer (lagging, via JS lerp) and swells
+   as the pointer nears an edge; the content leans slightly towards the pointer and a
+   soft light follows it. JS only writes transforms / two CSS vars on the active card. */
+.service-card-media{
+  position:absolute; inset:0; z-index:-2;
+  background-size:cover; background-position:center;
+  will-change:transform;
+}
+.service-card h4, .service-card .icon{ will-change:transform; }
+.service-card::after{
+  content:''; position:absolute; inset:0; z-index:-1; pointer-events:none;
+  background:radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(255,255,255,.28), transparent 45%);
+  opacity:0; transition:opacity .5s var(--ease-soft);
+}
+.service-card:hover::after{ opacity:1; }
+.service-card.wp .service-card-media{
+  background-image:url('assets/card-bg-image-wp.jpg');
+  background-image:image-set(url('assets/card-bg-image-wp.jpg') 1x, url('assets/card-bg-image-wp@2x.jpg') 2x);
+}
+.service-card.drupal .service-card-media{
+  background-image:url('assets/card-bg-image-drupal.jpg');
+  background-image:image-set(url('assets/card-bg-image-drupal.jpg') 1x, url('assets/card-bg-image-drupal@2x.jpg') 2x);
+}
+.service-card.custom .service-card-media{
+  background-image:url('assets/card-bg-image-custom.jpg');
+  background-image:image-set(url('assets/card-bg-image-custom.jpg') 1x, url('assets/card-bg-image-custom@2x.jpg') 2x);
+}
+
+/* ---------- Stats ---------- */
+.stats{ display:grid; grid-template-columns:repeat(4,1fr); gap:40px; padding-block:32px; }
+/* entrance modelled on stodio.webflow.io's about-us-counter-block: each stat rises
+   50px out of a 5px blur; JS clears these once the row scrolls into view */
+.stats > div{ opacity:0; transform:translateY(50px); filter:blur(5px); }
+.no-js .stats > div{ opacity:1; transform:none; filter:none; }
+@media (max-width:760px){ .stats{ grid-template-columns:repeat(2,1fr); } }
+.stat-num{
+  display:flex; align-items:flex-start;
+  font-size:clamp(2.6rem,1.4rem + 4.2vw,83px); font-weight:622; letter-spacing:-2px; line-height:1;
+  color:var(--ink); margin:0 0 18px;
+  font-stretch:109%; /* Safari honours font-stretch more reliably than a raw wdth setting */
+  font-variation-settings:"GRAD" 0,"ROND" 0,"wdth" 109;
+  /* odometer window: clip vertically only, one line tall */
+  clip-path: inset(0 -100vw);
+}
+/* each digit is a reel of 10 glyphs; an invisible copy of the final digit sizes the slot
+   so proportional digits keep their natural spacing while the reel spins */
+.odo-digit{ position:relative; display:inline-block; }
+.odo-sizer{ visibility:hidden; }
+.odo-reel{ position:absolute; top:0; left:50%; display:flex; flex-direction:column; align-items:center; translate:-50% 0; }
+.odo-reel > span{ display:block; height:1em; }
+.stat-divider{
+  height:1px; margin:0 0 18px;
+  background-image:linear-gradient(90deg, var(--red) 50%, transparent 0); background-size:4px 1px;
+}
+.stat-title{ font-size:20px; font-weight:600; letter-spacing:-.5px; line-height:1.3; color:var(--ink); margin:0 0 4px; }
+.stat-sub{ font-size:16px; line-height:1.5; color:var(--ink); margin:0; }
+
+/* ---------- Awards ---------- */
+.panel-grey{ background:var(--paper); border-radius:var(--radius-lg); }
+.awards{ display:grid; grid-template-columns:1fr 1fr; gap:40px; padding:clamp(28px,4vw,53px) clamp(24px,4vw,48px); align-items:center; }
+@media (max-width:820px){ .awards{ grid-template-columns:1fr; } }
+.awards h3{ font-size:clamp(1.7rem,1rem + 2.2vw,2.75rem); margin:12px 0 0; letter-spacing:-2px; line-height:1.1; font-weight:541; }
+.award-row{ display:flex; align-items:center; justify-content:space-between; gap:16px; margin-top:64px; flex-wrap:wrap; }
+.award-title{ display:flex; align-items:center; gap:16px; }
+.award-title img{ width:38px; height:auto; flex:none; }
+.award-title .name{ font-size:16px; color:var(--ink); }
+.award-title .win{ font-size:20px; font-weight:600; }
+.award-watermark img{ width:105px; height:auto; display:block; }
+.award-note{ border-top:1px solid var(--line); margin-top:22px; padding-top:16px; font-size:16px; line-height:1.5; color:var(--ink); }
+.award-photo{
+  position:relative; border-radius:16px; overflow:hidden; aspect-ratio:672/417;
+}
+.award-photo img{ width:100%; height:100%; object-fit:cover; display:block; }
+
+/* ---------- References ---------- */
+.dark-panel{ background:var(--ink); color:#fff; border-radius:var(--radius-lg); padding:clamp(32px,5vw,63px) clamp(20px,4vw,48px); }
+/* References: arrives on white with ink text; half-way in, the panel turns black; once it
+   reaches the top it is pinned, its background grows edge to edge, and further scrolling
+   drives the card rail sideways until the last card, then the page moves on.
+   Without JS (or with reduced motion) it falls back to a static dark panel with a
+   natively scrollable rail. */
+.refs-section{ padding-block:0; color:var(--ink); transition:color .6s var(--ease-soft); }
+.refs-section.is-dark{ color:#fff; }
+.refs-pin{ position:relative; }
+.refs-bg{ display:none; }
+.refs-content{ position:relative; padding:clamp(32px,5vw,63px) clamp(20px,4vw,48px); }
+.refs-section:not(.refs-pinned) .refs-content{ background:var(--ink); color:#fff; border-radius:var(--radius-lg); }
+.refs-pinned .refs-pin{ height:100vh; display:flex; align-items:center; overflow:hidden; }
+.refs-pinned .refs-wrap{ width:100%; position:relative; z-index:1; }
+.refs-pinned .refs-bg{
+  display:block; position:absolute; inset:0; background:#fff;
+  transition:background-color .6s var(--ease-soft);
+}
+.refs-pinned .refs-pin{ will-change:clip-path; }
+.refs-section.is-dark .refs-bg{ background:var(--ink); }
+.refs-pinned #refsRail{
+  overflow:visible; scroll-snap-type:none; padding-bottom:0; width:max-content;
+  touch-action:pan-y; cursor:grab; user-select:none; will-change:transform;
+}
+.refs-pinned #refsRail.is-dragging{ cursor:grabbing; }
+.refs-pinned .ref-card{ height:clamp(260px, calc(100vh - 528px), 549px); }
+.refs-head{ max-width:748px; margin-bottom:47px; }
+.refs-head .eyebrow{ color:var(--red); }
+.rail{ display:flex; gap:24px; overflow-x:auto; scroll-snap-type:x proximity; padding-bottom:8px; scrollbar-width:none; }
+.rail::-webkit-scrollbar{ display:none; }
+/* reference item (Figma 8604:840): image box with the text below it */
+.ref-item{ flex:none; width:406px; display:flex; flex-direction:column; gap:24px; color:inherit; }
+.ref-item.wide{ width:570px; }
+.ref-card{
+  position:relative; height:549px; border-radius:var(--radius-xl); overflow:hidden; isolation:isolate;
+  transition:transform .5s var(--ease-soft);
+}
+.ref-item:hover .ref-card{ transform:translateY(-8px); }
+/* crops as placed in Figma (percentages of the card box) */
+.ref-img{ position:absolute; inset:0; width:100%; height:100%; max-width:none; object-fit:cover; display:block; }
+.ref-img.is-cmsa{ inset:auto; width:166.2%; height:136.79%; left:-48.19%; top:-19.31%; }
+.ref-img.is-ampco{ inset:auto; width:167.65%; height:110.3%; left:-33.79%; top:-3%; }
+/* hover: the card cycles through its project shots (data-slides); each new shot dissolves
+   in over the previous one from a blur and 105% scale (JS) */
+.ref-slides{ position:absolute; inset:0; z-index:1; pointer-events:none; overflow:hidden; }
+.ref-slide{
+  position:absolute; inset:0; background-size:cover; background-position:center;
+  opacity:0; will-change:opacity, transform, filter;
+}
+.ref-text{ display:flex; flex-direction:column; gap:4px; min-height:74px; max-width:100%; }
+.ref-title{ display:flex; align-items:center; gap:8px; }
+.ref-title h5{ flex:1; margin:0; font-size:22px; font-weight:500; line-height:1.1; letter-spacing:-.5px; }
+/* colours follow the section's text colour (ink on white, white once it turns dark) */
+.ref-tag{
+  flex:none; padding:0 4px; border-radius:2px; font-size:15px; font-weight:600; line-height:1.5;
+  background:color-mix(in srgb, currentColor 20%, transparent);
+  color:color-mix(in srgb, currentColor 70%, transparent);
+}
+.ref-text p{ margin:0; max-width:400px; font-size:15px; line-height:1.5; color:color-mix(in srgb, currentColor 70%, transparent); }
+.refs-nav{ display:flex; align-items:center; justify-content:space-between; margin-top:47px; gap:16px; flex-wrap:wrap; }
+/* Figma pagination: 6px dark dots, the active one an 11px solid red dot */
+.refs-nav .dots{ gap:11px; }
+.refs-nav .dots i{ width:6px; height:6px; background:#383737; }
+.refs-nav .dots i.is-active{ width:11px; height:11px; border:0; background:var(--red); }
+.refs-nav .dots i.is-active::after{ content:none; }
+.dots{ display:flex; gap:7px; align-items:center; }
+.dots i{ position:relative; display:block; width:6px; height:6px; border-radius:50%; background:rgba(10,10,10,.25); flex:none; }
+.dark-panel .dots i, .dots.on-dark i{ background:rgba(255,255,255,.3); }
+.dots i.is-active{ width:20px; height:20px; background:transparent; border:2px solid var(--red); }
+.dots i.is-active::after{ content:''; position:absolute; inset:4px; border-radius:50%; background:var(--red); }
+
+/* ---------- How we work ---------- */
+.hww{ display:grid; grid-template-columns: 497fr 609fr; gap:clamp(32px,5vw,106px); align-items:center; padding:clamp(32px,5vw,64px) clamp(24px,5vw,98px); }
+@media (max-width:900px){ .hww{ grid-template-columns:1fr; } }
+.hww-media{ position:relative; border-radius:16px; overflow:hidden; aspect-ratio:497/764; }
+/* two equal stacked frames (upper / lower). Each rotates through the
+   Hottinger shots; the layer inside is 130% tall and lags behind the scroll (parallax),
+   the frame crops the bleed. */
+/* two equal halves, pinned by position (not grid) so every browser splits them 50/50 */
+.hww-frame{ position:absolute; left:0; right:0; height:50%; overflow:hidden; }
+.hww-frame.is-top{ top:0; }
+.hww-frame.is-bottom{ top:50%; }
+.hww-layer{ position:absolute; left:0; right:0; top:-15%; height:130%; will-change:transform; }
+.hww-slide{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; opacity:0; will-change:opacity, transform, filter; }
+.hww-slide.is-first{ opacity:1; }
+.hww-text .h3{ font-size:clamp(2rem, 1rem + 3.2vw, 3.75rem); margin:14px 0 18px; max-width:15ch; }
+.hww-text .body p{ margin:0 0 16px; font-size:18px; line-height:1.55; }
+.hww-text .body strong{ font-weight:700; }
+.hww-text ul{ list-style:none; margin:0 0 20px; display:flex; flex-direction:column; gap:10px; }
+.hww-text li{ position:relative; padding-left:22px; font-size:18px; line-height:1.5; }
+.hww-text li::before{ content:''; position:absolute; left:0; top:8.5px; width:10px; height:10px; background:url('assets/bullet-1.svg') no-repeat center / 10px 10px; } /* centred on the first 27px line */
+/* inline links: ink text on a faint 2px rule. On hover the grey rule fades out at once and
+   a red one draws in from the left (leaving to the right), like the nav underline; the
+   grey comes back once the red has gone */
+.ulink{ position:relative; color:var(--ink); font-weight:700; white-space:nowrap; }
+.ulink::before, .ulink::after{ content:''; position:absolute; left:0; right:0; bottom:-3px; height:2px; }
+.ulink::before{ background:rgba(10,10,10,.2); transition:opacity .25s ease .45s; }
+.ulink::after{
+  background:var(--red); transform:scaleX(0); transform-origin:right center;
+  transition:transform .6s cubic-bezier(.77,0,.18,1);
+}
+.ulink:hover::before{ opacity:0; transition-delay:0s; transition-duration:.12s; }
+.ulink:hover::after{ transform:scaleX(1); transform-origin:left center; }
+
+/* ---------- How we deliver ---------- */
+.hwd-head{ margin-bottom:32px; }
+/* horizontal carousels (How we deliver, Testimonials) bleed to both viewport edges while
+   the first card stays aligned with the content column */
+.hwd-rail, .testi-rail{
+  position:relative; display:flex; overflow-x:auto; scrollbar-width:none;
+  scroll-snap-type:x proximity; overscroll-behavior-x:contain;
+  margin-inline:calc(50% - 50vw); padding-inline:calc(50vw - 50%); /* scroll-padding set in JS (px) */
+  -webkit-user-select:none; user-select:none;
+}
+.hwd-rail::-webkit-scrollbar, .testi-rail::-webkit-scrollbar{ display:none; }
+.hwd-rail{ gap:24px; }
+.testi-rail{ gap:37px; }
+.hwd-rail img, .testi-rail img{ -webkit-user-drag:none; }
+/* How we deliver cards (Figma 8605:1179) */
+.hwd-card{
+  flex:none; width:min(468px,84vw); height:405px; border-radius:var(--radius-lg); padding:34px 35px;
+  display:flex; flex-direction:column; justify-content:space-between; overflow:hidden;
+  scroll-snap-align:start;
+}
+.hwd-card.c1{ background:var(--purple); }
+.hwd-card.c2{ background:var(--blue); }
+.hwd-card.c3{ background:var(--green); }
+.hwd-icon{ width:100px; height:100px; flex:none; }
+.hwd-icon img{ display:block; width:100%; height:100%; object-fit:contain; }
+.hwd-text{ display:flex; flex-direction:column; gap:4px; min-height:102px; }
+.hwd-card h5{ margin:0; font-size:24px; font-weight:600; letter-spacing:-.5px; line-height:1.1; }
+.hwd-card p{ margin:0; font-size:16px; line-height:1.5; color:var(--ink-80); }
+
+/* carousel pagination (Figma): 6px dots at 20% ink; the active one a 12px ink dot inside
+   a red ring that fills up while the autoplay counts down */
+.cdots{ display:flex; align-items:center; gap:10px; height:26px; margin-top:32px; }
+.cdots button{
+  position:relative; flex:none; width:6px; height:6px; padding:0; border:0; border-radius:50%;
+  background:rgba(10,10,10,.2); cursor:pointer;
+}
+.cdots button.is-active{ width:12px; height:12px; margin-inline:4px; background:var(--ink); }
+.cdots button.is-active:first-child{ margin-left:7px; }
+.cdots .ring{ position:absolute; left:50%; top:50%; width:26px; height:26px; overflow:visible; transform:translate(-50%,-50%) rotate(-90deg); pointer-events:none; }
+.cdots .ring circle{
+  fill:none; stroke:var(--red); stroke-opacity:.6; stroke-width:2;
+  stroke-dasharray:69.12; stroke-dashoffset:69.12;
+  animation:cdot-ring var(--cdot-dur,3s) linear forwards;
+}
+.cdots.is-paused .ring circle{ animation-play-state:paused; }
+@keyframes cdot-ring{ to{ stroke-dashoffset:0; } }
+
+/* ---------- Testimonials ---------- */
+/* Testimonials (Figma 8605:1217) */
+.testi-card{
+  flex:none; width:min(1232px, calc(100vw - 2 * var(--gutter) - 32px)); min-height:538px;
+  border-radius:var(--radius-lg); overflow:hidden; display:flex; background:transparent;
+  scroll-snap-align:start;
+}
+.testi-side{ position:relative; isolation:isolate; background:var(--paper); flex:1 1 0; max-width:452px; padding:32px; display:flex; justify-content:space-between; align-items:flex-start; gap:16px; color:#fff; }
+/* the black panel is its own layer so it can open from the left without scaling the content */
+.testi-bg{ position:absolute; inset:0; z-index:-1; background:var(--ink); transform-origin:left center; }
+.testi-meta{ align-self:stretch; display:flex; flex-direction:column; justify-content:space-between; align-items:flex-start; }
+.testi-meta .quote-mark{ display:block; width:50px; height:37px; overflow:visible; }
+/* drawn with a 2px red stroke, then filled (JS sets the dash length) */
+.testi-meta .quote-mark path{ fill:var(--red); fill-opacity:0; stroke:var(--red); stroke-width:2; stroke-linejoin:round; }
+.no-js .testi-meta .quote-mark path{ fill-opacity:1; }
+.testi-text .word-mask{ display:inline-block; overflow:hidden; vertical-align:top; padding-bottom:calc(.2em + 2px); margin-bottom:calc(-.2em - 2px); }
+.testi-text .word{ display:inline-block; will-change:transform; }
+.testi-author{ padding-top:80px; font-size:16px; line-height:1.5; }
+.testi-author strong{ display:block; font-weight:700; }
+.testi-author span{ display:block; color:rgba(255,255,255,.6); }
+.testi-meta .brand{ display:block; width:79px; height:auto; }
+.testi-avatar{ flex:none; width:170px; height:170px; overflow:hidden; transform-origin:50% 50%; }
+.testi-avatar img{ display:block; width:100%; height:100%; object-fit:cover; }
+.testi-quote{ flex:1 1 0; background:var(--paper); padding:48px; display:flex; align-items:flex-start; }
+.testi-quote p{ margin:0; font-size:clamp(22px, 1rem + 1.6vw, 38px); font-weight:500; line-height:1.3; letter-spacing:-.5px; color:var(--ink); }
+@media (max-width:760px){
+  .testi-card{ flex-direction:column; }
+  .testi-side{ max-width:none; }
+  .testi-avatar{ width:120px; height:120px; }
+  .testi-author{ padding-top:32px; }
+  .testi-quote{ padding:28px; }
+}
+
+/* ---------- Who we are ---------- */
+/* Who we are (Figma 8605:1538): one card; the lounge photo fills the back and the brothers
+   stand in front (portrait-front, cut-out). Parallax after superlogica.com: the lounge
+   zooms out from 1.25 while the section scrolls through, the portrait only a touch. */
+.wwa-card{
+  position:relative; isolation:isolate; overflow:hidden; border-radius:var(--radius-lg);
+  height:clamp(620px, 56vw, 805px); padding:clamp(32px, 5.5vw, 80px);
+  display:flex; flex-direction:column; justify-content:space-between; align-items:flex-start;
+  background:linear-gradient(200.86deg, #e7e7e7 15.5%, #cccccc 95.2%); color:#fff;
+}
+/* lounge box as placed in Figma: 1752x1032 at right -43 / top -177 of a 1344x805 card */
+.wwa-lounge{ position:absolute; z-index:-2; top:-22%; right:-3.2%; width:130.4%; height:128.2%; will-change:transform; }
+.wwa-lounge img{ display:block; width:100%; height:100%; object-fit:cover; }
+.wwa-lounge::after{ content:''; position:absolute; inset:0; background:rgba(10,17,24,.3); }
+/* portrait 833x828 at left 463, 83px below the card's bottom edge */
+.wwa-portrait{ position:absolute; z-index:-1; left:34.45%; bottom:0; width:62%; aspect-ratio:833/828; transform:translateY(10%); }
+.wwa-portrait-inner{ position:absolute; inset:0; transform-origin:50% 100%; will-change:transform; }
+.wwa-portrait-inner > img{ display:block; width:100%; height:100%; object-fit:contain; object-position:bottom; }
+/* name tags ride on the portrait, so they stay on the right person at any width */
+.name-badge{
+  position:absolute; padding:12px; border-radius:4px; color:#fff; white-space:nowrap;
+  font-size:14px; line-height:1.3;
+  /* the frosted plate comes in after the text (JS adds .is-bg) */
+  background:rgba(0,0,0,0); -webkit-backdrop-filter:blur(0px); backdrop-filter:blur(0px);
+  transition:background-color .8s var(--ease-soft), -webkit-backdrop-filter .8s var(--ease-soft), backdrop-filter .8s var(--ease-soft);
+}
+.name-badge.is-bg, .no-js .name-badge{ background:rgba(0,0,0,.2); -webkit-backdrop-filter:blur(6.5px); backdrop-filter:blur(6.5px); }
+/* each line rises out of its own mask, like the headlines */
+.nb-row{ display:block; overflow:hidden; padding-bottom:.15em; margin-bottom:-.15em; color:rgba(255,255,255,.65); }
+.nb-row > span{ display:block; will-change:transform; }
+.nb-row.is-name{ font-weight:700; color:#fff; }
+.name-badge.is-norbert{ left:7.92%; top:56.52%; }
+.name-badge.is-daniel{ left:77.43%; top:36.23%; }
+.wwa-title{ display:flex; flex-direction:column; gap:8px; }
+.wwa-eyebrow{ margin:0; font-size:15px; font-weight:500; line-height:1.5; text-transform:uppercase; color:#ec3841; }
+.wwa-h{ margin:0; max-width:455px; font-size:clamp(34px, 1.2rem + 3vw, 60px); font-weight:541; line-height:1.1; letter-spacing:-2px; }
+.wwa-lede{ margin:0; max-width:357px; font-size:clamp(18px, .9rem + .5vw, 22px); line-height:1.4; letter-spacing:-.5px; }
+@media (max-width:860px){
+  .wwa-card{ height:auto; min-height:760px; justify-content:flex-start; gap:18px; }
+  .wwa-portrait{ left:-6%; width:112%; }
+  .name-badge{ padding:8px; font-size:12px; }
+}
+
+/* ---------- Why us ---------- */
+.why-head{ margin-bottom:32px; }
+/* Why us (Figma 8605:1306) */
+.why-cards{ display:grid; grid-template-columns:repeat(4,1fr); gap:24px; }
+@media (max-width:900px){ .why-cards{ grid-template-columns:1fr 1fr; } }
+@media (max-width:560px){ .why-cards{ grid-template-columns:1fr; } }
+.why-card{
+  background:var(--purple); border-radius:var(--radius-lg); padding:24px; overflow:hidden;
+  display:flex; flex-direction:column; gap:80px;
+  transition:transform .4s var(--ease-soft), background-color .4s;
+}
+.why-card:hover{ transform:translateY(-6px); background:#d9c8f2; }
+.why-icon{ height:72px; display:flex; align-items:flex-start; overflow:hidden; }
+.why-icon img{ display:block; max-width:none; }
+.why-card:nth-child(3) .why-icon{ padding-inline:3px; }
+.why-text{ display:flex; flex-direction:column; gap:4px; }
+.why-card h5{ margin:0; font-size:24px; font-weight:600; letter-spacing:-.5px; line-height:1.1; }
+.why-card p{ margin:0; font-size:16px; line-height:1.5; color:var(--ink-80); }
+
+/* ---------- footer ---------- */
+footer{ background:var(--ink); color:rgba(255,255,255,.65); padding:44px 0; }
+.foot-row{ display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap; }
+.foot-row .logo{ color:#fff; }
+.foot-links{ display:flex; gap:26px; list-style:none; flex-wrap:wrap; }
+.foot-links a{ font-size:15px; color:rgba(255,255,255,.65); transition:color .25s; }
+.foot-links a:hover{ color:#fff; }
+
+@media (max-width:980px){
+  .nav-links, .nav-right .lang, .nav-right .header-cta{ display:none; }
+  .burger{ display:flex; }
+  .hero-grid{ grid-template-columns:1fr; }
+  .hero-headline{ max-width:none; }
+  .hero-mock{ position:relative; left:auto; top:auto; margin-top:0; width:100%; max-width:520px; }
+  .clients-bar{ flex-direction:column; align-items:flex-start; gap:16px; }
+  .hero-headline .stroke{ display:none; }
+}
+
+/* =========================== FLOATING CONTACT DOCK ===========================
+   modelled on moremedia.at's .mm-dock: a frosted pill fixed to the bottom centre.
+   It stays hidden until the first scroll, then a ball drops in, bounces, rolls
+   left-to-right "painting" the pill, and stretches into the button (see JS). */
+.mm-dock{
+  --dock-ink:#15140f;
+  --dock-spring: cubic-bezier(.34,1.56,.64,1);
+  position:fixed; left:50%; bottom:calc(30px + env(safe-area-inset-bottom)); z-index:1000;
+  display:flex; align-items:center; gap:5px; padding:7px;
+  max-width:calc(100vw - 24px);
+  border-radius:999px; border:1px solid rgba(21,20,15,.13);
+  background:rgba(247,245,240,.72);
+  backdrop-filter:blur(24px) saturate(1.7); -webkit-backdrop-filter:blur(24px) saturate(1.7);
+  transform:translateX(-50%);
+  transition: opacity .3s var(--ease-soft), visibility .3s, transform .3s var(--ease-soft);
+}
+.mm-dock::before{
+  content:''; position:absolute; inset:0; z-index:-1; border-radius:inherit;
+  box-shadow:0 4px 20px rgba(20,18,10,.2); pointer-events:none;
+}
+.mm-dock.is-pending{ opacity:0; visibility:hidden; pointer-events:none; }
+.mm-dock.no-anim{ transition:none; }
+.mm-dock.is-hidden{ opacity:0; visibility:hidden; pointer-events:none; transform:translateX(-50%) translateY(20px); }
+
+.mm-dock-btn{
+  display:inline-flex; align-items:center; gap:10px; flex:0 0 auto;
+  padding:14px 20px; border-radius:999px;
+  background:var(--dock-ink); color:#fff;
+  font-weight:600; font-size:17px; letter-spacing:-.5px; line-height:1; white-space:nowrap;
+  transition: opacity .3s var(--ease-soft), transform .22s var(--dock-spring);
+}
+.mm-dock-btn:hover{ opacity:.9; }
+.mm-dock-btn:active{ transform:scale(.94); }
+.mm-dock-ic{ display:inline-flex; }
+.mm-dock-ic svg{ width:17px; height:15px; display:block; transform-origin:50% 50%; animation:mm-chat-pulse 2.6s ease-in-out infinite; }
+.mm-dock-btn .mm-dock-ic, .mm-dock-btn .mm-dock-label{ transition:opacity .16s var(--ease-soft); }
+.mm-dock-btn.is-label-hidden .mm-dock-ic, .mm-dock-btn.is-label-hidden .mm-dock-label{ visibility:hidden; }
+.mm-dock-btn.is-fading-in .mm-dock-ic, .mm-dock-btn.is-fading-in .mm-dock-label{ opacity:0; }
+@keyframes mm-chat-pulse{
+  0%,100%{ transform:scale(1); }
+  45%{ transform:scale(1.14); }
+  70%{ transform:scale(.98); }
+}
+#mm-dock-ball{
+  position:fixed; top:0; left:0; z-index:1001;
+  border-radius:999px; background:#15140f;
+  box-shadow:0 10px 26px rgba(20,18,10,.3);
+  opacity:0; pointer-events:none; will-change:transform, width;
+}
+@media (max-width:640px){
+  .mm-dock{ bottom:calc(18px + env(safe-area-inset-bottom)); padding:6px; }
+  .mm-dock-btn{ padding:12px 15px; font-size:15px; }
+}
+@media (prefers-reduced-motion:reduce){
+  #mm-dock-ball{ display:none; }
+  .mm-dock-ic svg{ animation:none; }
+}
+</style>
+</head>
+<body class="no-js">
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="icon-arrow" viewBox="-2 -2 16 16"><path d="M10.4766 0H11.3203V0.84375V9.28125V10.125H9.63281V9.28125V2.88281L1.79297 10.7227L1.19531 11.3203L0 10.125L0.597656 9.52734L8.4375 1.6875H2.03906H1.19531V0H2.03906H10.4766Z" fill="currentColor"/></symbol>
+    <symbol id="logo-full" viewBox="0 0 160 48">
+      <circle cx="23.7141" cy="27.0398" r="18.0877" stroke="currentColor" stroke-width="3.44527"/>
+      <line x1="23.7143" y1="19.2871" x2="23.7143" y2="34.7908" stroke="currentColor" stroke-width="3.44527"/>
+      <line x1="31.4663" y1="27.039" x2="15.9626" y2="27.039" stroke="currentColor" stroke-width="3.44527"/>
+      <path d="M12.9315 10.9506L0.530127 14.9623" stroke="currentColor" stroke-width="3.44527"/>
+      <path d="M12.9316 10.9504L8.76758 2.5166" stroke="currentColor" stroke-width="3.44527"/>
+      <path d="M12.9315 10.9504L22.9805 1.2389" stroke="currentColor" stroke-width="3.44527"/>
+      <path d="M150.249 47.1444C147.59 47.1444 145.337 46.3646 143.491 44.805C141.645 43.2453 140.722 41.1809 140.722 38.6116C140.722 36.0574 141.649 34.0043 143.502 32.4522C145.356 30.9001 147.605 30.124 150.249 30.124C152.894 30.124 155.143 30.9114 156.996 32.4861C158.85 34.0533 159.777 36.0989 159.777 38.6229C159.777 41.1394 158.854 43.1888 157.008 44.7711C155.162 46.3533 152.909 47.1444 150.249 47.1444ZM150.249 43.4375C151.824 43.4375 153.139 42.9854 154.194 42.0812C155.248 41.1771 155.776 40.0243 155.776 38.6229C155.776 37.2064 155.245 36.0537 154.182 35.1646C153.127 34.2755 151.816 33.831 150.249 33.831C148.69 33.831 147.379 34.2793 146.316 35.1759C145.254 36.065 144.723 37.214 144.723 38.6229C144.723 40.0319 145.25 41.1884 146.305 42.0925C147.36 42.9892 148.675 43.4375 150.249 43.4375Z" fill="currentColor"/>
+      <path d="M131.258 46.7261V32.4972H135.214V46.7261H131.258ZM125.935 34.1472V30.542H140.515V34.1472H125.935Z" fill="currentColor"/>
+      <path d="M109.78 46.7261L117.024 30.542H120.369L127.602 46.7261H123.206L119.318 37.2439L118.685 35.413H118.617L117.985 37.2326L114.097 46.7261H109.78ZM113.272 43.7763L114.345 41.0074H122.777L123.929 43.7763H113.272Z" fill="currentColor"/>
+      <path d="M87.5986 46.7261V30.542H92.2549L98.0075 41.9228H98.064L103.737 30.542H108.405V46.7261H104.585V39.1539L104.664 36.5545H104.585L99.4654 46.7261H96.5383L91.4412 36.5997H91.3621L91.4412 39.1652V46.7261H87.5986Z" fill="currentColor"/>
+      <path d="M76.0552 47.1444C73.3955 47.1444 71.1427 46.3646 69.2968 44.805C67.4508 43.2453 66.5278 41.1809 66.5278 38.6116C66.5278 36.0574 67.4546 34.0043 69.3081 32.4522C71.1615 30.9001 73.4106 30.124 76.0552 30.124C78.6998 30.124 80.9488 30.9114 82.8023 32.4861C84.6558 34.0533 85.5825 36.0989 85.5825 38.6229C85.5825 41.1394 84.6596 43.1888 82.8136 44.7711C80.9677 46.3533 78.7149 47.1444 76.0552 47.1444ZM76.0552 43.4375C77.6299 43.4375 78.9447 42.9854 79.9995 42.0812C81.0543 41.1771 81.5817 40.0243 81.5817 38.6229C81.5817 37.2064 81.0505 36.0537 79.9882 35.1646C78.9334 34.2755 77.6224 33.831 76.0552 33.831C74.4955 33.831 73.1845 34.2793 72.1222 35.1759C71.0598 36.065 70.5286 37.214 70.5286 38.6229C70.5286 40.0319 71.0561 41.1884 72.1109 42.0925C73.1657 42.9892 74.4805 43.4375 76.0552 43.4375Z" fill="currentColor"/>
+      <path d="M57.0641 46.7261V32.4972H61.0197V46.7261H57.0641ZM51.741 34.1472V30.542H66.3202V34.1472H51.741Z" fill="currentColor"/>
+      <path d="M121.184 23.1434C120.137 23.1434 119.184 23.0078 118.325 22.7366C117.466 22.4729 116.716 22.1037 116.076 21.629C115.435 21.1468 114.919 20.6269 114.527 20.0694C114.136 19.5118 113.94 19.233 113.94 19.233L116.81 17.4813C116.81 17.4813 116.957 17.6583 117.251 18.0125C117.552 18.3666 117.903 18.6906 118.302 18.9844C118.709 19.2707 119.172 19.4968 119.692 19.6625C120.22 19.8207 120.789 19.8998 121.399 19.8998C122.25 19.8998 122.94 19.7416 123.467 19.4252C123.994 19.1012 124.258 18.6567 124.258 18.0916C124.258 17.534 123.912 17.1008 123.218 16.7919C122.533 16.4754 121.429 16.1364 119.907 15.7747C118.099 15.3377 116.754 14.7312 115.872 13.9551C114.991 13.1716 114.55 12.1619 114.55 10.9263C114.55 9.48719 115.149 8.32688 116.347 7.44535C117.552 6.56381 119.154 6.12305 121.15 6.12305C122.092 6.12305 122.951 6.2323 123.727 6.4508C124.511 6.6693 125.192 6.98575 125.773 7.40014C126.36 7.81454 126.816 8.2327 127.14 8.65463C127.464 9.06903 127.626 9.27623 127.626 9.27623L124.891 10.9715C124.891 10.9715 124.782 10.8622 124.563 10.6437C124.345 10.4177 124.043 10.1992 123.659 9.98824C123.275 9.76974 122.853 9.60398 122.393 9.49096C121.941 9.37794 121.444 9.32143 120.902 9.32143C120.156 9.32143 119.557 9.44952 119.105 9.70569C118.653 9.96187 118.426 10.3122 118.426 10.7568C118.426 11.1938 118.656 11.5441 119.116 11.8078C119.575 12.0715 120.706 12.403 122.506 12.8024C124.548 13.2695 125.999 13.9401 126.858 14.8141C127.716 15.6805 128.146 16.7241 128.146 17.9447C128.146 19.5269 127.498 20.7889 126.202 21.7307C124.914 22.6725 123.241 23.1434 121.184 23.1434Z" fill="currentColor"/>
+      <path d="M106.305 23.1434C105.258 23.1434 104.305 23.0078 103.446 22.7366C102.587 22.4729 101.837 22.1037 101.197 21.629C100.556 21.1468 100.04 20.6269 99.6485 20.0694C99.2567 19.5118 99.0608 19.233 99.0608 19.233L101.931 17.4813C101.931 17.4813 102.078 17.6583 102.372 18.0125C102.674 18.3666 103.024 18.6906 103.423 18.9844C103.83 19.2707 104.293 19.4968 104.813 19.6625C105.341 19.8207 105.91 19.8998 106.52 19.8998C107.371 19.8998 108.061 19.7416 108.588 19.4252C109.116 19.1012 109.379 18.6567 109.379 18.0916C109.379 17.534 109.033 17.1008 108.34 16.7919C107.654 16.4754 106.55 16.1364 105.028 15.7747C103.22 15.3377 101.875 14.7312 100.993 13.9551C100.112 13.1716 99.6711 12.1619 99.6711 10.9263C99.6711 9.48719 100.27 8.32688 101.468 7.44535C102.674 6.56381 104.275 6.12305 106.271 6.12305C107.213 6.12305 108.072 6.2323 108.848 6.4508C109.632 6.6693 110.314 6.98575 110.894 7.40014C111.481 7.81454 111.937 8.2327 112.261 8.65463C112.585 9.06903 112.747 9.27623 112.747 9.27623L110.012 10.9715C110.012 10.9715 109.903 10.8622 109.684 10.6437C109.466 10.4177 109.165 10.1992 108.78 9.98824C108.396 9.76974 107.974 9.60398 107.514 9.49096C107.062 9.37794 106.565 9.32143 106.023 9.32143C105.277 9.32143 104.678 9.44952 104.226 9.70569C103.774 9.96187 103.548 10.3122 103.548 10.7568C103.548 11.1938 103.777 11.5441 104.237 11.8078C104.697 12.0715 105.827 12.403 107.627 12.8024C109.669 13.2695 111.12 13.9401 111.979 14.8141C112.838 15.6805 113.267 16.7241 113.267 17.9447C113.267 19.5269 112.619 20.7889 111.323 21.7307C110.035 22.6725 108.362 23.1434 106.305 23.1434Z" fill="currentColor"/>
+      <path d="M93.3157 22.7261V6.54199H97.2939V22.7261H93.3157Z" fill="currentColor"/>
+      <path d="M71.4849 22.7261L66.1731 6.54199H70.3999L73.3271 16.0919L73.6322 17.2447H73.7113L74.073 16.0919L77.5878 6.54199H80.7975L84.1428 16.0919L84.5271 17.2447H84.6062L84.934 16.0806L87.9063 6.54199H91.8732L86.5388 22.7261H82.9336L79.43 12.9162L79.0571 11.7182H78.9779L78.605 12.9162L75.045 22.7261H71.4849Z" fill="currentColor"/>
+      <path d="M59.042 23.1434C57.9947 23.1434 57.0416 23.0078 56.1827 22.7366C55.3237 22.4729 54.5741 22.1037 53.9336 21.629C53.2932 21.1468 52.7771 20.6269 52.3853 20.0694C51.9935 19.5118 51.7976 19.233 51.7976 19.233L54.6682 17.4813C54.6682 17.4813 54.8152 17.6583 55.109 18.0125C55.4104 18.3666 55.7607 18.6906 56.1601 18.9844C56.5669 19.2707 57.0303 19.4968 57.5502 19.6625C58.0776 19.8207 58.6465 19.8998 59.2567 19.8998C60.1081 19.8998 60.7975 19.7416 61.325 19.4252C61.8524 19.1012 62.1161 18.6567 62.1161 18.0916C62.1161 17.534 61.7695 17.1008 61.0763 16.7919C60.3907 16.4754 59.2869 16.1364 57.7649 15.7747C55.9566 15.3377 54.6117 14.7312 53.7302 13.9551C52.8487 13.1716 52.4079 12.1619 52.4079 10.9263C52.4079 9.48719 53.0069 8.32688 54.2049 7.44535C55.4104 6.56381 57.0115 6.12305 59.0081 6.12305C59.9499 6.12305 60.8088 6.2323 61.5849 6.4508C62.3685 6.6693 63.0504 6.98575 63.6305 7.40014C64.2182 7.81454 64.674 8.2327 64.998 8.65463C65.322 9.06903 65.484 9.27623 65.484 9.27623L62.749 10.9715C62.749 10.9715 62.6397 10.8622 62.4212 10.6437C62.2027 10.4177 61.9013 10.1992 61.5171 9.98824C61.1328 9.76974 60.7109 9.60398 60.2513 9.49096C59.7992 9.37794 59.302 9.32143 58.7595 9.32143C58.0136 9.32143 57.4146 9.44952 56.9625 9.70569C56.5104 9.96187 56.2844 10.3122 56.2844 10.7568C56.2844 11.1938 56.5142 11.5441 56.9738 11.8078C57.4334 12.0715 58.5636 12.403 60.3643 12.8024C62.4062 13.2695 63.8565 13.9401 64.7155 14.8141C65.5744 15.6805 66.0039 16.7241 66.0039 17.9447C66.0039 19.5269 65.3559 20.7889 64.06 21.7307C62.7716 22.6725 61.0989 23.1434 59.042 23.1434Z" fill="currentColor"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="cursor" id="cursor" aria-hidden="true"><div class="cursor-trail"></div><div class="cursor-dot"><svg class="cursor-arrow" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H8M17 7V16"/></svg></div></div>
+<div class="scroll-progress" id="progress"></div>
+
+<!-- ============ NAV ============ -->
+<header class="site-nav" id="siteNav">
+  <div class="wrap nav-inner">
+    <a class="logo"><svg viewBox="0 0 160 48"><use href="#logo-full"></use></svg></a>
+    <nav>
+      <ul class="nav-links">
+        <li><a class="is-active">Services</a></li>
+        <li><a>Who We Help</a></li>
+        <li><a>References</a></li>
+        <li><a>Agency</a></li>
+        <li><a>Contact</a></li>
+      </ul>
+    </nav>
+    <div class="nav-right">
+      <span class="lang">EN</span>
+      <div class="header-cta">
+        <a class="btn"><span class="btn-label"><span>Start Project</span><span aria-hidden="true">Start Project</span></span></a>
+        <a class="btn btn-arrow"><svg class="icon-arrow" viewBox="0 0 54 54"><use href="#icon-arrow"></use></svg></a>
+      </div>
+      <button class="burger" id="burger" aria-label="Open menu"><span></span></button>
+    </div>
+  </div>
+</header>
+
+<div class="mobile-menu" id="mobileMenu">
+  <ul>
+    <li><a>Services</a></li>
+    <li><a>Who We Help</a></li>
+    <li><a>References</a></li>
+    <li><a>Agency</a></li>
+    <li><a>Contact</a></li>
+  </ul>
+</div>
+
+<main id="top">
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="hero-frame">
+    <div class="hero-bg" id="heroParallax">
+      <img src="assets/hero-background.jpg" srcset="assets/hero-background.jpg 1x, assets/hero-background@2x.jpg 2x" alt="">
+    </div>
+
+    <div class="hero-shade" aria-hidden="true"></div>
+    <div class="hero-inner">
+      <div class="hero-grid">
+        <div class="hero-text">
+          <p class="hero-eyebrow" data-reveal>Web design &amp; development agency in Geneva &amp; Zürich</p>
+          <h1 class="hero-headline" data-reveal data-split>
+            Enterprise-grade websites built to perform and scale.
+            <img class="stroke" id="heroStroke" src="assets/decorative-line-hero.svg" width="280" height="19" alt="">
+          </h1>
+          <p class="hero-desc" data-reveal>Short-term trends pass, but solid technical foundations remain. As an independent, family-led studio, we craft high-speed, secure websites with personal care, transparent collaboration, and senior engineering in every build.</p>
+          <div class="header-cta" data-reveal>
+            <a class="btn btn-red"><span class="btn-label"><span>Start Project</span><span aria-hidden="true">Start Project</span></span></a>
+            <a class="btn btn-red btn-arrow" aria-label="Start Project"><svg class="icon-arrow" viewBox="0 0 54 54"><use href="#icon-arrow"></use></svg></a>
+          </div>
+        </div>
+
+        <div class="hero-mock" id="heroMock" data-reveal>
+          <img src="assets/hero-mockup-front.png" srcset="assets/hero-mockup-front.png 1x, assets/hero-mockup-front@2x.png 2x" width="1024" height="658" alt="Swiss Tomato website preview">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="clients-bar" data-reveal>
+    <p class="cb-label">Trusted by ambitious brands</p>
+    <div class="marquee">
+      <div class="marquee-track" id="marqueeTrack">
+        <img src="assets/logo-un.svg" alt="United Nations"><img src="assets/logo-client-2.svg" alt=""><img src="assets/logo-swiss.svg" alt="Swiss"><img src="assets/logo-rivella.svg" alt="Rivella"><img src="assets/logo-groupe-mutuel.svg" alt="Groupe Mutuel"><img src="assets/logo-wto-2.svg" alt="WTO"><img src="assets/logo-mazda.svg" alt="Mazda"><img src="assets/logo-nestle.svg" alt="Nestlé"><img src="assets/logo-client-15.svg" alt=""><img src="assets/logo-client-17.svg" alt=""><img src="assets/logo-synova.svg" alt="Synova"><img src="assets/logo-client-20.svg" alt=""><img src="assets/logo-client-21.svg" alt=""><img src="assets/logo-client-22.svg" alt=""><img src="assets/logo-client-23.svg" alt=""><img src="assets/logo-client-24.svg" alt=""><img src="assets/logo-client-25.svg" alt=""><img src="assets/logo-client-26.svg" alt=""><img src="assets/logo-client-27.svg" alt=""><img src="assets/logo-hottinger.svg" alt="Hottinger"><img src="assets/logo-client-29.svg" alt=""><img src="assets/logo-client-30.svg" alt=""><img src="assets/logo-bayer.svg" alt="Bayer"><img src="assets/logo-capital.svg" alt="">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SERVICES ============ -->
+<section class="section" id="services">
+  <div class="wrap wrap-pad-32">
+    <div class="services-head">
+      <div>
+        <p class="eyebrow" data-reveal>Services</p>
+        <h2 class="h2" data-split>Tailored digital platforms built on robust architecture and modern tech.</h2>
+      </div>
+      <a class="btn" style="background:transparent; padding:0; height:auto;" data-reveal>
+        <span style="font-size:27px; font-weight:500; letter-spacing:-.5px;">What we do</span> <svg class="icon-arrow" viewBox="0 0 54 54" style="width:16px;height:16px;"><use href="#icon-arrow"></use></svg>
+      </a>
+    </div>
+    <div class="services-cards">
+      <article class="service-card wp" data-img-reveal="cover" data-slide-in="quick" data-cursor="media">
+        <div class="service-card-media" aria-hidden="true"></div>
+        <h4>WordPress Development</h4>
+        <img class="icon" src="assets/service-icon-wp.svg" width="76" height="76" alt="">
+      </article>
+      <article class="service-card drupal" data-img-reveal="cover" data-slide-in="quick" data-cursor="media">
+        <div class="service-card-media" aria-hidden="true"></div>
+        <h4>Drupal Development</h4>
+        <img class="icon" src="assets/service-icon-drupal.svg" width="59" height="78" alt="">
+      </article>
+      <article class="service-card custom" data-img-reveal="cover" data-slide-in="quick" data-cursor="media">
+        <div class="service-card-media" aria-hidden="true"></div>
+        <h4>Custom Development</h4>
+        <img class="icon" src="assets/service-icon-custom.svg" width="96" height="78" alt="">
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ STATS ============ -->
+<section class="section section-tight">
+  <div class="wrap wrap-stats stats">
+    <div>
+      <p class="stat-num" aria-label="12+"><span class="odo" data-value="12">12</span><span aria-hidden="true">+</span></p>
+      <div class="stat-divider"></div>
+      <p class="stat-title">Years delivering digital projects</p>
+      <p class="stat-sub">across Switzerland</p>
+    </div>
+    <div>
+      <p class="stat-num" aria-label="200+"><span class="odo" data-value="200">200</span><span aria-hidden="true">+</span></p>
+      <div class="stat-divider"></div>
+      <p class="stat-title">Projects</p>
+      <p class="stat-sub">completed successfully</p>
+    </div>
+    <div>
+      <p class="stat-num" aria-label="15+"><span class="odo" data-value="15">15</span><span aria-hidden="true">+</span></p>
+      <div class="stat-divider"></div>
+      <p class="stat-title">15 national and international awards</p>
+    </div>
+    <div>
+      <p class="stat-num" aria-label="3"><span class="odo" data-value="3">3</span></p>
+      <div class="stat-divider"></div>
+      <p class="stat-title">Locations</p>
+      <p class="stat-sub">Geneva, Zürich, Budapest</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ AWARDS WALL (modelled on moto-card.com's .numbers section) ============ -->
+<section class="section section-tight" aria-labelledby="awTitle" hidden><!-- awards wall: parked for now -->
+  <div class="wrap">
+  <div class="panel-grey awards-wall" id="awards-wall">
+    <div class="aw-track is-left">
+      <ul class="aw-list" aria-label="Le Meilleur du Web awards">
+          <li class="aw-item"><span class="aw-org">Le Meilleur du Web</span><span class="aw-name">Innovation</span><span class="aw-meta">2021, Top 4</span></li>
+          <li class="aw-item"><span class="aw-org">Le Meilleur du Web</span><span class="aw-name">Technology</span><span class="aw-meta">2025, Shortlist</span></li>
+          <li class="aw-item"><span class="aw-org">Le Meilleur du Web</span><span class="aw-name">Technology</span><span class="aw-meta">2025, Shortlist</span></li>
+          <li class="aw-item"><span class="aw-org">Le Meilleur du Web</span><span class="aw-name">Best App</span><span class="aw-meta">2016, Top 3</span></li>
+          <li class="aw-item"><span class="aw-org">Le Meilleur du Web</span><span class="aw-name">Technology</span><span class="aw-meta">2025, Shortlist</span></li>
+          <li class="aw-item"><span class="aw-org">Le Meilleur du Web</span><span class="aw-name">Mobile</span><span class="aw-meta">2025, Winner</span></li>
+          <li class="aw-item"><span class="aw-org">Le Meilleur du Web</span><span class="aw-name">Mobile</span><span class="aw-meta">2025, Winner</span></li>
+          <li class="aw-item"><span class="aw-org">Le Meilleur du Web</span><span class="aw-name">Mobile</span><span class="aw-meta">2025, Winner</span></li>
+          <li class="aw-item"><span class="aw-org">Le Meilleur du Web</span><span class="aw-name">Mobile</span><span class="aw-meta">2025, Winner</span></li>
+      </ul>
+    </div>
+    <div class="aw-track is-right">
+      <ul class="aw-list" aria-label="Best of Swiss App awards">
+          <li class="aw-item"><span class="aw-org">Best of Swiss App</span><span class="aw-name">Innovation</span><span class="aw-meta">2021, Top 4</span></li>
+          <li class="aw-item"><span class="aw-org">Best of Swiss App</span><span class="aw-name">Technology</span><span class="aw-meta">2025, Shortlist</span></li>
+          <li class="aw-item"><span class="aw-org">Best of Swiss App</span><span class="aw-name">Technology</span><span class="aw-meta">2025, Shortlist</span></li>
+          <li class="aw-item"><span class="aw-org">Best of Swiss App</span><span class="aw-name">Best App</span><span class="aw-meta">2016, Top 3</span></li>
+          <li class="aw-item"><span class="aw-org">Best of Swiss App</span><span class="aw-name">Technology</span><span class="aw-meta">2025, Shortlist</span></li>
+          <li class="aw-item"><span class="aw-org">Best of Swiss App</span><span class="aw-name">Extended Reality</span><span class="aw-meta">2025, Winner</span></li>
+          <li class="aw-item"><span class="aw-org">Best of Swiss App</span><span class="aw-name">Mobile</span><span class="aw-meta">2025, Winner</span></li>
+          <li class="aw-item"><span class="aw-org">Best of Swiss App</span><span class="aw-name">AR/VR</span><span class="aw-meta">2025, Winner</span></li>
+          <li class="aw-item"><span class="aw-org">Best of Swiss App</span><span class="aw-name">Mobile</span><span class="aw-meta">2025, Winner</span></li>
+      </ul>
+    </div>
+    <div class="aw-fade is-top" aria-hidden="true"></div>
+    <div class="aw-fade is-bottom" aria-hidden="true"></div>
+    <div class="aw-content">
+      <div class="aw-head">
+        <p class="eyebrow">Awards</p>
+        <h2 class="aw-title" id="awTitle" data-split>Celebrating achievements that motivate and uplift.</h2>
+      </div>
+      <p class="stat-title aw-sub" data-lines-in aria-label="Proudly recognized as an award-winning agency in Switzerland since 2014">
+        <span class="aw-line" aria-hidden="true">Proudly recognized as an</span>
+        <span class="aw-line" aria-hidden="true">award-winning agency in</span>
+        <span class="aw-line" aria-hidden="true">Switzerland since 2014</span>
+      </p>
+    </div>
+  </div>
+  </div>
+</section>
+
+<!-- ============ AWARDS ============ -->
+<section class="section section-tight">
+  <div class="wrap">
+    <div class="panel-grey awards" data-reveal>
+      <div>
+        <p class="eyebrow" style="margin-bottom:0;">Awards</p>
+        <h3 data-split>Celebrating achievements that motivate and uplift.</h3>
+        <div class="award-row">
+          <div class="award-title">
+            <img src="assets/trophy.svg" alt="">
+            <div>
+              <p class="name" style="margin:0;">Le Meilleur du Web</p>
+              <p class="win" style="margin:0;">Winner, 2021</p>
+            </div>
+          </div>
+          <div class="award-watermark"><img src="assets/logo-lemeilleur.png" srcset="assets/logo-lemeilleur.png 1x, assets/logo-lemeilleur@2x.png 2x" alt="Le Meilleur du Web"></div>
+        </div>
+        <p class="award-note">+ <strong>14 nominations</strong> at the largest Swiss awards, such as Best of Swiss App, Best of Swiss Web, Apple Developer</p>
+      </div>
+      <div class="award-photo" data-img-reveal="cover">
+        <img src="assets/img-winner.jpg" srcset="assets/img-winner.jpg 1x, assets/img-winner@2x.jpg 2x" alt="Swiss Tomato accepting the Le Meilleur du Web award" loading="lazy">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ REFERENCES ============ -->
+<section class="section refs-section" id="references">
+  <div class="refs-pin">
+    <div class="refs-bg" aria-hidden="true"></div>
+    <div class="wrap refs-wrap">
+    <div class="refs-content">
+      <div class="refs-head">
+        <p class="eyebrow" data-split-lead>References</p>
+        <h2 class="h2" data-split>Building digital products that drive growth</h2>
+      </div>
+      <div class="rail" id="refsRail">
+        <a class="ref-item" data-cursor="media" data-slides="assets/ref-card-vse.png,assets/ref-card-cmsa.png,assets/ref-card-ampco.png">
+          <div class="ref-card">
+            <img class="ref-img" src="assets/ref-card-vse.png" alt="VSE Strom website on a device" loading="lazy">
+            <div class="ref-slides" aria-hidden="true"></div>
+          </div>
+          <div class="ref-text">
+            <div class="ref-title"><h5>VSE Strom</h5><span class="ref-tag">B2B</span></div>
+            <p>Sleek and user-friendly website redesign tailored for a Swiss industry leader</p>
+          </div>
+        </a>
+        <a class="ref-item wide" data-cursor="media" data-slides="assets/ref-card-cmsa.png,assets/ref-card-ampco.png,assets/ref-card-vse.png">
+          <div class="ref-card">
+            <img class="ref-img is-cmsa" src="assets/ref-card-cmsa.png" alt="CMSA website on a device" loading="lazy">
+            <div class="ref-slides" aria-hidden="true"></div>
+          </div>
+          <div class="ref-text">
+            <div class="ref-title"><h5>CMSA</h5><span class="ref-tag">B2B</span></div>
+            <p>Merged brands into one site, enhancing user experience with multilingual support</p>
+          </div>
+        </a>
+        <a class="ref-item wide" data-cursor="media" data-slides="assets/ref-card-ampco.png,assets/ref-card-vse.png,assets/ref-card-cmsa.png">
+          <div class="ref-card">
+            <img class="ref-img is-ampco" src="assets/ref-card-ampco.png" alt="AMPCO website on a device" loading="lazy">
+            <div class="ref-slides" aria-hidden="true"></div>
+          </div>
+          <div class="ref-text">
+            <div class="ref-title"><h5>AMPCO</h5><span class="ref-tag">B2B</span></div>
+            <p>Revamping website for enhanced user experience</p>
+          </div>
+        </a>
+        <a class="ref-item" data-cursor="media" data-slides="assets/ref-card-vse.png,assets/ref-card-cmsa.png,assets/ref-card-ampco.png">
+          <div class="ref-card">
+            <img class="ref-img" src="assets/ref-card-vse.png" alt="VSE Strom website on a device" loading="lazy">
+            <div class="ref-slides" aria-hidden="true"></div>
+          </div>
+          <div class="ref-text">
+            <div class="ref-title"><h5>VSE Strom</h5><span class="ref-tag">B2B</span></div>
+            <p>Sleek and user-friendly website redesign tailored for a Swiss industry leader</p>
+          </div>
+        </a>
+        <a class="ref-item wide" data-cursor="media" data-slides="assets/ref-card-cmsa.png,assets/ref-card-ampco.png,assets/ref-card-vse.png">
+          <div class="ref-card">
+            <img class="ref-img is-cmsa" src="assets/ref-card-cmsa.png" alt="CMSA website on a device" loading="lazy">
+            <div class="ref-slides" aria-hidden="true"></div>
+          </div>
+          <div class="ref-text">
+            <div class="ref-title"><h5>CMSA</h5><span class="ref-tag">B2B</span></div>
+            <p>Merged brands into one site, enhancing user experience with multilingual support</p>
+          </div>
+        </a>
+        <a class="ref-item wide" data-cursor="media" data-slides="assets/ref-card-ampco.png,assets/ref-card-vse.png,assets/ref-card-cmsa.png">
+          <div class="ref-card">
+            <img class="ref-img is-ampco" src="assets/ref-card-ampco.png" alt="AMPCO website on a device" loading="lazy">
+            <div class="ref-slides" aria-hidden="true"></div>
+          </div>
+          <div class="ref-text">
+            <div class="ref-title"><h5>AMPCO</h5><span class="ref-tag">B2B</span></div>
+            <p>Revamping website for enhanced user experience</p>
+          </div>
+        </a>
+      </div>
+      <div class="refs-nav">
+        <div class="dots"><i class="is-active"></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="header-cta">
+          <a class="btn btn-red"><span class="btn-label"><span>All References</span><span aria-hidden="true">All References</span></span></a>
+          <a class="btn btn-red btn-arrow" aria-label="All References"><svg class="icon-arrow" viewBox="0 0 54 54"><use href="#icon-arrow"></use></svg></a>
+        </div>
+      </div>
+    </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HOW WE WORK ============ -->
+<section class="section section-tight" id="who-we-help">
+  <div class="wrap">
+    <div class="panel-grey hww" data-reveal>
+      <div class="hww-media" data-img-reveal="cover" role="img" aria-label="Hottinger website shown on laptop, phone and tablet">
+        <div class="hww-frame is-top" data-rotate="1,2" data-rotate-offset="0"><div class="hww-layer"></div></div>
+        <div class="hww-frame is-bottom" data-rotate="3,4" data-rotate-offset="2"><div class="hww-layer"></div></div>
+      </div>
+      <div class="hww-text">
+        <p class="eyebrow" style="margin-bottom:0;" data-split-lead>How we work</p>
+        <h3 class="h3" data-split>Designed for clarity. Built for action.</h3>
+        <div class="body">
+          <p>At Swiss Tomato, we create high-performing websites. Our UI/UX designers and developers craft user-friendly products tailored to your audience.</p>
+          <p><strong>What we deliver:</strong></p>
+          <ul>
+            <li>Local Expertise: Swiss account managers in Geneva and Zurich with a design hub in Budapest.</li>
+            <li>Built for Conversion: Optimized landing pages and user journeys to convert visitors.</li>
+            <li>SEO-Ready: Fully optimized architecture for online visibility.</li>
+          </ul>
+          <p><strong>Core Services:</strong></p>
+          <ul>
+            <li>Web Design &amp; UI/UX: Custom site design, <a class="ulink">web app</a> interfaces, and e-commerce platforms.</li>
+            <li>CMS &amp; Framework Development: Expert <a class="ulink">WordPress</a> and <a class="ulink">Drupal</a> setups, alongside custom builds using PHP, Laravel, JavaScript, Vue.js, React, and Node.js.</li>
+            <li>Optimization &amp; Operations: SEO, ongoing technical support, and reliable hosting.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HOW WE DELIVER ============ -->
+<section class="section">
+  <div class="wrap wrap-pad-16">
+    <h2 class="h3 hwd-head" data-reveal>How we deliver</h2>
+    <div class="hwd-rail" id="hwdRail" data-carousel data-cursor="carousel">
+      <article class="hwd-card c1">
+        <div class="hwd-icon"><img src="assets/hwd-icon-1.svg" width="100" height="100" alt=""></div>
+        <div class="hwd-text"><h5>Responsive Collaboration</h5><p>You work directly with a dedicated Swiss project manager backed by senior developers. No communication black holes.</p></div>
+      </article>
+      <article class="hwd-card c2">
+        <div class="hwd-icon"><img src="assets/hwd-icon-2.svg" width="100" height="100" alt=""></div>
+        <div class="hwd-text"><h5>Predictable Timelines</h5><p>We set clear milestones and ensure a transparent workflow, eliminating surprises on launch day.</p></div>
+      </article>
+      <article class="hwd-card c3">
+        <div class="hwd-icon"><img src="assets/hwd-icon-3.svg" width="100" height="100" alt=""></div>
+        <div class="hwd-text"><h5>Proactive Technical Guidance</h5><p>We don&#8217;t just follow orders; we enhance your strategy with cleaner code, improved UX, and scalable tech.</p></div>
+      </article>
+      <article class="hwd-card c1">
+        <div class="hwd-icon"><img src="assets/hwd-icon-1.svg" width="100" height="100" alt=""></div>
+        <div class="hwd-text"><h5>Responsive Collaboration</h5><p>You work directly with a dedicated Swiss project manager backed by senior developers. No communication black holes.</p></div>
+      </article>
+      <article class="hwd-card c2">
+        <div class="hwd-icon"><img src="assets/hwd-icon-2.svg" width="100" height="100" alt=""></div>
+        <div class="hwd-text"><h5>Predictable Timelines</h5><p>We set clear milestones and ensure a transparent workflow, eliminating surprises on launch day.</p></div>
+      </article>
+    </div>
+    <div class="cdots" data-dots-for="hwdRail" aria-label="How we deliver slides"></div>
+  </div>
+</section>
+
+<!-- ============ TESTIMONIALS ============ -->
+<section class="section section-tight">
+  <div class="wrap wrap-pad-16">
+    <div class="testi-rail" id="testiRail" data-carousel data-carousel-interval="4" data-cursor="carousel">
+      <article class="testi-card">
+        <div class="testi-side">
+          <span class="testi-bg" aria-hidden="true"></span>
+          <div class="testi-meta">
+            <svg class="quote-mark" viewBox="0 0 50 37" width="50" height="37" aria-hidden="true"><path d="M49.913 5.82199L43.097 15.691C44.8483 16.3537 46.3867 17.5843 47.712 19.383C49.0847 21.1343 49.771 23.2407 49.771 25.702C49.771 28.968 48.706 31.666 46.576 33.796C44.4933 35.8787 41.7717 36.92 38.411 36.92C35.145 36.92 32.4233 35.8787 30.246 33.796C28.116 31.666 27.051 28.968 27.051 25.702C27.051 23.8087 27.4533 21.9627 28.258 20.164C29.0627 18.318 30.3643 16.0697 32.163 13.419L41.322 0C41.322 0 44.1857 1.94066 49.913 5.82199ZM22.862 5.82199L16.046 15.691C17.7973 16.3537 19.3357 17.5843 20.661 19.383C21.9863 21.1343 22.649 23.2407 22.649 25.702C22.649 28.968 21.584 31.666 19.454 33.796C17.3713 35.8787 14.6497 36.92 11.289 36.92C8.023 36.92 5.325 35.8787 3.195 33.796C1.065 31.666 0 28.968 0 25.702C0 23.8087 0.402334 21.9627 1.207 20.164C2.01167 18.318 3.31333 16.0697 5.112 13.419L14.2 0C14.2 0 17.0873 1.94066 22.862 5.82199Z"/></svg>
+            <div class="testi-author" data-testi-late><strong>Yannick Pittet</strong><span>PM Digital Marketing, CMSA</span></div>
+            <img class="brand" data-testi-late src="assets/CMSA-logo.svg" width="79" height="17" alt="CMSA">
+          </div>
+          <div class="testi-avatar"><img src="assets/testimonial-avatar.png" width="170" height="170" alt="Yannick Pittet" loading="lazy"></div>
+        </div>
+        <div class="testi-quote"><p class="testi-text">We worked with Swiss Tomato on our corporate website, unifying sites and presenting activities clearly. They structured the site for better navigation, resulting in a modern, scalable website that supports our goals.</p></div>
+      </article>
+      <article class="testi-card">
+        <div class="testi-side">
+          <span class="testi-bg" aria-hidden="true"></span>
+          <div class="testi-meta">
+            <svg class="quote-mark" viewBox="0 0 50 37" width="50" height="37" aria-hidden="true"><path d="M49.913 5.82199L43.097 15.691C44.8483 16.3537 46.3867 17.5843 47.712 19.383C49.0847 21.1343 49.771 23.2407 49.771 25.702C49.771 28.968 48.706 31.666 46.576 33.796C44.4933 35.8787 41.7717 36.92 38.411 36.92C35.145 36.92 32.4233 35.8787 30.246 33.796C28.116 31.666 27.051 28.968 27.051 25.702C27.051 23.8087 27.4533 21.9627 28.258 20.164C29.0627 18.318 30.3643 16.0697 32.163 13.419L41.322 0C41.322 0 44.1857 1.94066 49.913 5.82199ZM22.862 5.82199L16.046 15.691C17.7973 16.3537 19.3357 17.5843 20.661 19.383C21.9863 21.1343 22.649 23.2407 22.649 25.702C22.649 28.968 21.584 31.666 19.454 33.796C17.3713 35.8787 14.6497 36.92 11.289 36.92C8.023 36.92 5.325 35.8787 3.195 33.796C1.065 31.666 0 28.968 0 25.702C0 23.8087 0.402334 21.9627 1.207 20.164C2.01167 18.318 3.31333 16.0697 5.112 13.419L14.2 0C14.2 0 17.0873 1.94066 22.862 5.82199Z"/></svg>
+            <div class="testi-author" data-testi-late><strong>Yannick Pittet</strong><span>PM Digital Marketing, CMSA</span></div>
+            <img class="brand" data-testi-late src="assets/CMSA-logo.svg" width="79" height="17" alt="CMSA">
+          </div>
+          <div class="testi-avatar"><img src="assets/testimonial-avatar.png" width="170" height="170" alt="Yannick Pittet" loading="lazy"></div>
+        </div>
+        <div class="testi-quote"><p class="testi-text">We worked with Swiss Tomato on our corporate website, unifying sites and presenting activities clearly. They structured the site for better navigation, resulting in a modern, scalable website that supports our goals.</p></div>
+      </article>
+      <article class="testi-card">
+        <div class="testi-side">
+          <span class="testi-bg" aria-hidden="true"></span>
+          <div class="testi-meta">
+            <svg class="quote-mark" viewBox="0 0 50 37" width="50" height="37" aria-hidden="true"><path d="M49.913 5.82199L43.097 15.691C44.8483 16.3537 46.3867 17.5843 47.712 19.383C49.0847 21.1343 49.771 23.2407 49.771 25.702C49.771 28.968 48.706 31.666 46.576 33.796C44.4933 35.8787 41.7717 36.92 38.411 36.92C35.145 36.92 32.4233 35.8787 30.246 33.796C28.116 31.666 27.051 28.968 27.051 25.702C27.051 23.8087 27.4533 21.9627 28.258 20.164C29.0627 18.318 30.3643 16.0697 32.163 13.419L41.322 0C41.322 0 44.1857 1.94066 49.913 5.82199ZM22.862 5.82199L16.046 15.691C17.7973 16.3537 19.3357 17.5843 20.661 19.383C21.9863 21.1343 22.649 23.2407 22.649 25.702C22.649 28.968 21.584 31.666 19.454 33.796C17.3713 35.8787 14.6497 36.92 11.289 36.92C8.023 36.92 5.325 35.8787 3.195 33.796C1.065 31.666 0 28.968 0 25.702C0 23.8087 0.402334 21.9627 1.207 20.164C2.01167 18.318 3.31333 16.0697 5.112 13.419L14.2 0C14.2 0 17.0873 1.94066 22.862 5.82199Z"/></svg>
+            <div class="testi-author" data-testi-late><strong>Yannick Pittet</strong><span>PM Digital Marketing, CMSA</span></div>
+            <img class="brand" data-testi-late src="assets/CMSA-logo.svg" width="79" height="17" alt="CMSA">
+          </div>
+          <div class="testi-avatar"><img src="assets/testimonial-avatar.png" width="170" height="170" alt="Yannick Pittet" loading="lazy"></div>
+        </div>
+        <div class="testi-quote"><p class="testi-text">We worked with Swiss Tomato on our corporate website, unifying sites and presenting activities clearly. They structured the site for better navigation, resulting in a modern, scalable website that supports our goals.</p></div>
+      </article>
+      <article class="testi-card">
+        <div class="testi-side">
+          <span class="testi-bg" aria-hidden="true"></span>
+          <div class="testi-meta">
+            <svg class="quote-mark" viewBox="0 0 50 37" width="50" height="37" aria-hidden="true"><path d="M49.913 5.82199L43.097 15.691C44.8483 16.3537 46.3867 17.5843 47.712 19.383C49.0847 21.1343 49.771 23.2407 49.771 25.702C49.771 28.968 48.706 31.666 46.576 33.796C44.4933 35.8787 41.7717 36.92 38.411 36.92C35.145 36.92 32.4233 35.8787 30.246 33.796C28.116 31.666 27.051 28.968 27.051 25.702C27.051 23.8087 27.4533 21.9627 28.258 20.164C29.0627 18.318 30.3643 16.0697 32.163 13.419L41.322 0C41.322 0 44.1857 1.94066 49.913 5.82199ZM22.862 5.82199L16.046 15.691C17.7973 16.3537 19.3357 17.5843 20.661 19.383C21.9863 21.1343 22.649 23.2407 22.649 25.702C22.649 28.968 21.584 31.666 19.454 33.796C17.3713 35.8787 14.6497 36.92 11.289 36.92C8.023 36.92 5.325 35.8787 3.195 33.796C1.065 31.666 0 28.968 0 25.702C0 23.8087 0.402334 21.9627 1.207 20.164C2.01167 18.318 3.31333 16.0697 5.112 13.419L14.2 0C14.2 0 17.0873 1.94066 22.862 5.82199Z"/></svg>
+            <div class="testi-author" data-testi-late><strong>Yannick Pittet</strong><span>PM Digital Marketing, CMSA</span></div>
+            <img class="brand" data-testi-late src="assets/CMSA-logo.svg" width="79" height="17" alt="CMSA">
+          </div>
+          <div class="testi-avatar"><img src="assets/testimonial-avatar.png" width="170" height="170" alt="Yannick Pittet" loading="lazy"></div>
+        </div>
+        <div class="testi-quote"><p class="testi-text">We worked with Swiss Tomato on our corporate website, unifying sites and presenting activities clearly. They structured the site for better navigation, resulting in a modern, scalable website that supports our goals.</p></div>
+      </article>
+      <article class="testi-card">
+        <div class="testi-side">
+          <span class="testi-bg" aria-hidden="true"></span>
+          <div class="testi-meta">
+            <svg class="quote-mark" viewBox="0 0 50 37" width="50" height="37" aria-hidden="true"><path d="M49.913 5.82199L43.097 15.691C44.8483 16.3537 46.3867 17.5843 47.712 19.383C49.0847 21.1343 49.771 23.2407 49.771 25.702C49.771 28.968 48.706 31.666 46.576 33.796C44.4933 35.8787 41.7717 36.92 38.411 36.92C35.145 36.92 32.4233 35.8787 30.246 33.796C28.116 31.666 27.051 28.968 27.051 25.702C27.051 23.8087 27.4533 21.9627 28.258 20.164C29.0627 18.318 30.3643 16.0697 32.163 13.419L41.322 0C41.322 0 44.1857 1.94066 49.913 5.82199ZM22.862 5.82199L16.046 15.691C17.7973 16.3537 19.3357 17.5843 20.661 19.383C21.9863 21.1343 22.649 23.2407 22.649 25.702C22.649 28.968 21.584 31.666 19.454 33.796C17.3713 35.8787 14.6497 36.92 11.289 36.92C8.023 36.92 5.325 35.8787 3.195 33.796C1.065 31.666 0 28.968 0 25.702C0 23.8087 0.402334 21.9627 1.207 20.164C2.01167 18.318 3.31333 16.0697 5.112 13.419L14.2 0C14.2 0 17.0873 1.94066 22.862 5.82199Z"/></svg>
+            <div class="testi-author" data-testi-late><strong>Yannick Pittet</strong><span>PM Digital Marketing, CMSA</span></div>
+            <img class="brand" data-testi-late src="assets/CMSA-logo.svg" width="79" height="17" alt="CMSA">
+          </div>
+          <div class="testi-avatar"><img src="assets/testimonial-avatar.png" width="170" height="170" alt="Yannick Pittet" loading="lazy"></div>
+        </div>
+        <div class="testi-quote"><p class="testi-text">We worked with Swiss Tomato on our corporate website, unifying sites and presenting activities clearly. They structured the site for better navigation, resulting in a modern, scalable website that supports our goals.</p></div>
+      </article>
+    </div>
+    <div class="cdots" data-dots-for="testiRail" aria-label="Testimonial slides"></div>
+  </div>
+</section>
+
+<!-- ============ WHO WE ARE ============ -->
+<section class="section section-tight" id="agency">
+  <div class="wrap wrap-pad-32">
+    <div class="wwa-card" data-reveal>
+      <div class="wwa-lounge" aria-hidden="true"><img src="assets/lounge.jpg" srcset="assets/lounge.jpg 1x, assets/lounge@2x.jpg 2x" alt="" loading="lazy"></div>
+      <div class="wwa-portrait">
+        <div class="wwa-portrait-inner">
+          <img src="assets/portrait-front.png" srcset="assets/portrait-front.png 1x, assets/portrait-front@2x.png 2x" alt="Norbert and Daniel Racsko, co-founders of Swiss Tomato" loading="lazy">
+          <div class="name-badge is-norbert"><span class="nb-row is-name"><span>Norbert Racsko</span></span><span class="nb-row"><span>Co-founder</span></span><span class="nb-row"><span>Head of Client Relations</span></span></div>
+          <div class="name-badge is-daniel"><span class="nb-row is-name"><span>Daniel Racsko</span></span><span class="nb-row"><span>Co-founder</span></span><span class="nb-row"><span>Head of Operations</span></span></div>
+        </div>
+      </div>
+      <div class="wwa-title">
+        <p class="wwa-eyebrow" data-split-lead>Who we are</p>
+        <h2 class="wwa-h" data-split>Built by two brothers, backed by enterprise expertise.</h2>
+      </div>
+      <p class="wwa-lede">We combine boutique personal care with enterprise-grade technical execution to give your business a measurable edge.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ WHY US ============ -->
+<section class="section">
+  <div class="wrap wrap-whyus">
+    <h2 class="h3 why-head" data-reveal>Why us</h2>
+    <div class="why-cards">
+      <article class="why-card" data-slide-in="quick">
+        <div class="why-icon"><img src="assets/why-icon-1.svg" width="54" height="72" alt=""></div>
+        <div class="why-text"><h5>Boutique Agility</h5><p>Direct access to key decision-makers and quick turnarounds without bureaucratic delays.</p></div>
+      </article>
+      <article class="why-card" data-slide-in="quick">
+        <div class="why-icon"><img src="assets/why-icon-2.svg" width="68" height="72" alt=""></div>
+        <div class="why-text"><h5>Robust Architecture</h5><p>Future-proof technology built on strict security, speed, and clean code standards.</p></div>
+      </article>
+      <article class="why-card" data-slide-in="quick">
+        <div class="why-icon"><img src="assets/why-icon-3.svg" width="87" height="75" alt=""></div>
+        <div class="why-text"><h5>Personal Accountability</h5><p>As a family agency, we build reliable long-term digital infrastructure.</p></div>
+      </article>
+      <article class="why-card" data-slide-in="quick">
+        <div class="why-icon"><img src="assets/why-icon-4.svg" width="73" height="65" alt=""></div>
+        <div class="why-text"><h5>True Collaboration</h5><p>We don&#8217;t just execute specs blindly; we proactively refine your digital product to maximize ROI.</p></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer id="contact">
+  <div class="wrap">
+    <div class="foot-row">
+      <a class="logo"><svg viewBox="0 0 160 48"><use href="#logo-full"></use></svg></a>
+      <ul class="foot-links">
+        <li><a>Services</a></li>
+        <li><a>Who We Help</a></li>
+        <li><a>References</a></li>
+        <li><a>Agency</a></li>
+        <li><a>Contact</a></li>
+      </ul>
+    </div>
+  </div>
+</footer>
+
+<!-- ============ FLOATING CONTACT DOCK ============ -->
+<div class="mm-dock is-pending no-anim" id="contactDock">
+  <a class="mm-dock-btn is-contact" aria-label="Get in touch">
+    <span class="mm-dock-ic"><svg viewBox="0 0 17 15" fill="none" aria-hidden="true"><path d="M3.71875 10.8574L3.35352 11.8203L3.12109 12.4512L5.04688 11.8535L5.51172 11.7207L5.97656 11.8535C6.74023 12.0859 7.60352 12.2188 8.5 12.2188C12.6172 12.2188 15.4062 9.5625 15.4062 6.90625C15.4062 4.2832 12.6172 1.59375 8.5 1.59375C4.34961 1.59375 1.59375 4.2832 1.59375 6.90625C1.59375 8.10156 2.0918 9.19727 2.98828 10.127L3.71875 10.8574ZM2.42383 14.3105L0.53125 14.875L1.22852 13.0156L1.89258 11.2559C0.697266 10.0938 0 8.56641 0 6.90625C0 3.12109 3.78516 0 8.5 0C13.1816 0 17 3.12109 17 6.90625C17 10.7246 13.1816 13.8125 8.5 13.8125C7.4375 13.8125 6.44141 13.6797 5.51172 13.3809L2.42383 14.3105Z" fill="currentColor"/></svg></span>
+    <span class="mm-dock-label">Get in touch</span>
+  </a>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://unpkg.com/lenis@1.1.14/dist/lenis.min.js"></script>
+<script>
+document.body.classList.remove('no-js');
+document.body.classList.add('js');
+
+/* ---------------- Lenis smooth scroll ---------------- */
+var lenis = new Lenis({ lerp: 0.11, wheelMultiplier: 1, smoothWheel: true });
+function raf(time){ lenis.raf(time); requestAnimationFrame(raf); }
+requestAnimationFrame(raf);
+
+gsap.registerPlugin(ScrollTrigger);
+/* scroll-in reveals wait until an element is a little way into the viewport, then a beat */
+var REVEAL_START = 'top 78%';
+var REVEAL_DELAY = .15;
+lenis.on('scroll', ScrollTrigger.update);
+gsap.ticker.add(function(time){ lenis.raf(time * 1000); });
+gsap.ticker.lagSmoothing(0);
+
+/* smooth-scroll same-page anchors, closing mobile menu if open */
+document.querySelectorAll('a[href^="#"]').forEach(function(a){
+  a.addEventListener('click', function(e){
+    var id = a.getAttribute('href');
+    if(id.length < 2) return;
+    var target = document.querySelector(id);
+    if(!target) return;
+    e.preventDefault();
+    closeMenu();
+    lenis.scrollTo(target, { offset: -20, duration: 1.15 });
+  });
+});
+
+/* ---------------- scroll progress bar ---------------- */
+var progress = document.getElementById('progress');
+ScrollTrigger.create({
+  start:0, end: 'max',
+  onUpdate: function(self){ gsap.set(progress, { scaleX: self.progress }); }
+});
+
+/* ---------------- nav: stick + hide on scroll down ----------------
+   disabled for now — the nav stays at the top of the page (see .site-nav).
+   Re-enable together with position:fixed on .site-nav.
+var nav = document.getElementById('siteNav');
+var lastY = 0;
+ScrollTrigger.create({
+  start: 60, end: 99999,
+  onUpdate: function(self){
+    nav.classList.toggle('is-stuck', self.scroll() > 40);
+    var y = self.scroll();
+    if(y > lastY && y > 220){ nav.classList.add('nav-hidden'); }
+    else { nav.classList.remove('nav-hidden'); }
+    lastY = y;
+  }
+});
+*/
+
+/* ---------------- custom cursor ----------------
+   dot eases after the pointer (lerp); the trail chases it with a damped spring
+   (stiffness 120, damping 18, mass 1 — same feel as framer-motion's useSpring) */
+var cursor = document.getElementById('cursor');
+var hasFine = window.matchMedia('(hover:hover) and (pointer:fine)').matches;
+if(hasFine){
+  var dot = cursor.querySelector('.cursor-dot');
+  var trail = cursor.querySelector('.cursor-trail');
+  var HOVER_SEL = 'a, button, [role="button"], label, select, input';
+  var mx = -200, my = -200, dx = -200, dy = -200, tx = -200, ty = -200, vx = 0, vy = 0;
+  var K = 120, C = 18, M = 1, STEP = 1/240;
+
+  window.addEventListener('mousemove', function(e){
+    if(!cursor.classList.contains('is-visible')){ dx = tx = e.clientX; dy = ty = e.clientY; } /* no fly-in from the corner */
+    mx = e.clientX; my = e.clientY;
+    cursor.classList.add('is-visible');
+    var car = !!(e.target.closest && e.target.closest('[data-cursor="carousel"]'));
+    var media = car || !!(e.target.closest && e.target.closest('[data-cursor="media"]'));
+    cursor.classList.toggle('is-media', media);
+    cursor.classList.toggle('is-carousel', car);
+    cursor.classList.toggle('is-left', car && e.clientX < window.innerWidth / 2);
+    cursor.classList.toggle('is-hover', !media && !!(e.target.closest && e.target.closest(HOVER_SEL)));
+  });
+  document.documentElement.addEventListener('mouseleave', function(){ cursor.classList.remove('is-visible'); });
+
+  gsap.ticker.add(function(time, deltaMs){
+    /* 0.45 per 60fps frame, scaled so the lag feels the same at any refresh rate */
+    var f = 1 - Math.pow(1 - .45, deltaMs / (1000/60));
+    dx += (mx - dx) * f; dy += (my - dy) * f;
+    dot.style.transform = 'translate(' + dx + 'px,' + dy + 'px) translate(-50%,-50%)';
+    /* small fixed substeps keep the spring stable after long frames */
+    var acc = Math.min(deltaMs / 1000, .1);
+    while(acc > 0){
+      var h = Math.min(STEP, acc); acc -= h;
+      vx += (-K * (tx - dx) - C * vx) / M * h; tx += vx * h;
+      vy += (-K * (ty - dy) - C * vy) / M * h; ty += vy * h;
+    }
+    trail.style.transform = 'translate(' + tx + 'px,' + ty + 'px) translate(-50%,-50%)';
+  });
+}
+
+/* ---------------- references: dark switch, pin, edge-to-edge, horizontal rail ----------------
+   1. arrives white / ink text; section top at mid-viewport -> .is-dark (bg + text colour ease)
+   2. pinned when it reaches the top; the background's clip-path grows from the panel shape
+      (10px top/bottom, content-width sides, rounded) to the full viewport
+   3. remaining pinned scroll moves the rail left until the last card lines up with the
+      content edge; scrub:1 gives the move a soft lag. Mouse/touch drag on the rail scrolls
+      the page (through Lenis, so it glides) and therefore the rail too. */
+(function(){
+  var section = document.getElementById('references');
+  if(!section) return;
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var pin = section.querySelector('.refs-pin');
+  var bg = section.querySelector('.refs-bg');
+  var content = section.querySelector('.refs-content');
+  var rail = document.getElementById('refsRail');
+  var dots = section.querySelectorAll('.refs-nav .dots i');
+  section.classList.add('refs-pinned');
+
+  ScrollTrigger.create({
+    trigger: section, start:'top 50%',
+    onEnter: function(){ section.classList.add('is-dark'); },
+    onLeaveBack: function(){ section.classList.remove('is-dark'); }
+  });
+
+  function edge(){ return content.getBoundingClientRect().left; }
+  function railLeft(){ return edge() + parseFloat(getComputedStyle(content).paddingLeft); }
+  function travel(){ return Math.max(0, railLeft() + rail.scrollWidth - (window.innerWidth - railLeft())); }
+  function panelInset(){
+    var r = content.getBoundingClientRect();
+    return 'inset(10px ' + (window.innerWidth - r.right) + 'px 10px ' + r.left + 'px round 20px)';
+  }
+
+  var EXPAND = function(){ return window.innerHeight * .45; };
+  var T = travel(), E = EXPAND();
+  var tl = gsap.timeline({
+    scrollTrigger: {
+      trigger: pin, start:'top top', end: function(){ return '+=' + (EXPAND() + travel()); },
+      pin:true, scrub:1, invalidateOnRefresh:true, anticipatePin:1,
+      refreshPriority:1, /* measure before the triggers further down the page */
+      onUpdate: function(self){
+        var e = EXPAND(), t = travel();
+        var p = Math.min(1, Math.max(0, (self.progress * (e + t) - e) / Math.max(1, t)));
+        var idx = Math.round(p * (dots.length - 1));
+        dots.forEach(function(d, i){ d.classList.toggle('is-active', i === idx); });
+      }
+    }
+  });
+  /* the whole pinned stage is clipped to the panel (so cards past its edge stay hidden) and opens up */
+  tl.fromTo(pin, { clipPath: panelInset }, { clipPath:'inset(0px 0px 0px 0px round 0px)', ease:'power2.inOut', duration: E / (E + T) }, 0)
+    .fromTo(rail, { x:0 }, { x: function(){ return -travel(); }, ease:'none', duration: T / (E + T) }, E / (E + T));
+  var st = tl.scrollTrigger;
+
+  /* drag / swipe on the rail -> page scroll (1 px sideways = 1 px of pinned scroll) */
+  var dragging = false, dragged = false, startX = 0, startScroll = 0;
+  rail.addEventListener('pointerdown', function(e){
+    if(e.pointerType === 'mouse' && e.button !== 0) return;
+    dragging = true; dragged = false; startX = e.clientX; startScroll = window.scrollY;
+    rail.classList.add('is-dragging');
+    rail.setPointerCapture(e.pointerId);
+  });
+  rail.addEventListener('pointermove', function(e){
+    if(!dragging) return;
+    if(Math.abs(e.clientX - startX) > 6) dragged = true;
+    var min = st.start + (st.end - st.start) * (EXPAND() / (EXPAND() + travel()));
+    var target = Math.min(st.end, Math.max(min, startScroll - (e.clientX - startX) * 1.2));
+    lenis.scrollTo(target, { lerp:.08 });
+  });
+  function endDrag(){ dragging = false; rail.classList.remove('is-dragging'); }
+  rail.addEventListener('pointerup', endDrag);
+  rail.addEventListener('pointercancel', endDrag);
+  /* a drag ends with a click on the card under the pointer: swallow it */
+  rail.addEventListener('click', function(e){ if(dragged){ e.preventDefault(); dragged = false; } }, true);
+})();
+
+/* ---------------- reference cards: looping image swap on hover ----------------
+   on hover the card steps through data-slides every HOLD seconds, starting with the next
+   shot; each incoming shot is laid on top and dissolves in (opacity 0 -> 1) while it
+   un-blurs (12px -> 0) and settles from 105% to 100%. Leaving fades the stack out,
+   back to the base image. Slides are built lazily on first hover. */
+(function(){
+  var HOLD = 2.2, IN = 1.6;
+  document.querySelectorAll('.ref-item[data-slides]').forEach(function(card){
+    var stack = card.querySelector('.ref-slides');
+    var srcs = card.getAttribute('data-slides').split(',');
+    var slides = null, idx = 0, z = 1, timer = null;
+
+    function build(){
+      slides = srcs.map(function(src){
+        var el = document.createElement('div');
+        el.className = 'ref-slide';
+        el.style.backgroundImage = 'url(' + src.trim() + ')';
+        stack.appendChild(el);
+        return el;
+      });
+    }
+    function show(i){
+      var el = slides[i];
+      el.style.zIndex = ++z;
+      gsap.fromTo(el, { opacity:0, filter:'blur(16px)', scale:1.06 },
+        { opacity:1, filter:'blur(0px)', scale:1, duration:IN, ease:'power2.inOut', overwrite:true });
+    }
+    function next(){
+      idx = (idx + 1) % slides.length;
+      show(idx);
+      timer = gsap.delayedCall(HOLD, next);
+    }
+    card.addEventListener('mouseenter', function(){
+      if(!slides) build();
+      idx = 0;                       /* slide 0 = the card's own shot; start on the next */
+      if(timer) timer.kill();
+      next();
+    });
+    card.addEventListener('mouseleave', function(){
+      if(timer){ timer.kill(); timer = null; }
+      gsap.to(slides, { opacity:0, duration:.5, ease:'power2.out', overwrite:true });
+    });
+  });
+})();
+
+/* ---------------- carousels (How we deliver, Testimonials) ----------------
+   - stops = each card's scroll position (clamped to the end), one dot per stop
+   - autoplay: every INTERVAL the rail eases (in-out) to the next stop, wrapping to the
+     first; the active dot's red ring fills over the same time. Paused while hovered,
+     dragged or off screen.
+   - touch: native swipe (overflow-x + snap); mouse: drag to scroll, released onto the
+     nearest stop with the same ease. Clicking the left / right half of the viewport
+     steps back / forward (the cursor arrow shows which way).
+   Snap is switched off while JS animates the scroll so the two don't fight. */
+(function(){
+  var DUR = 900; /* autoplay interval: data-carousel-interval (s), default 3 */
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function ease(t){ return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+
+  document.querySelectorAll('[data-carousel]').forEach(function(rail){
+    var INTERVAL = parseFloat(rail.getAttribute('data-carousel-interval')) || 3;
+    var dotsEl = document.querySelector('[data-dots-for="' + rail.id + '"]');
+    var cards = [].slice.call(rail.children);
+    var stops = [], idx = 0, timer = null, anim = null, hovering = false, inView = false;
+
+    function measure(){
+      var pad = parseFloat(getComputedStyle(rail).paddingLeft);
+      /* % in scroll-padding resolves against the rail itself, not its parent: use px */
+      rail.style.scrollPaddingInline = pad + 'px';
+      var max = rail.scrollWidth - rail.clientWidth;
+      stops = [];
+      cards.forEach(function(c){
+        var x = Math.min(max, Math.max(0, c.offsetLeft - pad));
+        if(!stops.length || x - stops[stops.length - 1] > 4) stops.push(x);
+      });
+      buildDots();
+    }
+    function buildDots(){
+      if(!dotsEl) return;
+      dotsEl.innerHTML = stops.map(function(_, i){ return '<button type="button" aria-label="Slide ' + (i + 1) + '"></button>'; }).join('');
+      [].forEach.call(dotsEl.children, function(b, i){ b.addEventListener('click', function(){ go(i); }); });
+      paintDots();
+    }
+    function paintDots(){
+      if(!dotsEl) return;
+      dotsEl.style.setProperty('--cdot-dur', INTERVAL + 's');
+      [].forEach.call(dotsEl.children, function(b, i){
+        b.classList.toggle('is-active', i === idx);
+        b.setAttribute('aria-current', i === idx ? 'true' : 'false');
+        b.innerHTML = i === idx && !reduce ? '<svg class="ring" viewBox="0 0 26 26"><circle cx="13" cy="13" r="11"/></svg>' : '';
+      });
+    }
+    function nearest(){
+      var best = 0;
+      stops.forEach(function(x, i){ if(Math.abs(x - rail.scrollLeft) < Math.abs(stops[best] - rail.scrollLeft)) best = i; });
+      return best;
+    }
+    function scrollTo(x){
+      if(anim) cancelAnimationFrame(anim);
+      var from = rail.scrollLeft, t0 = null;
+      rail.style.scrollSnapType = 'none';
+      (function step(ts){
+        if(t0 === null) t0 = ts;
+        var p = Math.min(1, (ts - t0) / DUR);
+        rail.scrollLeft = from + (x - from) * ease(p);
+        if(p < 1) anim = requestAnimationFrame(step);
+        else { anim = null; rail.style.scrollSnapType = ''; }
+      })(performance.now());
+    }
+    function go(i){
+      idx = (i + stops.length) % stops.length;
+      scrollTo(stops[idx]);
+      paintDots();
+      restart();
+      rail.dispatchEvent(new CustomEvent('carousel:change', { detail:{ index:idx } }));
+    }
+    function restart(){
+      if(timer) timer.kill();
+      if(reduce) return;
+      timer = gsap.delayedCall(INTERVAL, function(){ go(idx + 1); });
+      syncPause();
+    }
+    function syncPause(){
+      var paused = hovering || dragging || !inView;
+      if(timer) paused ? timer.pause() : timer.resume();
+      if(dotsEl) dotsEl.classList.toggle('is-paused', paused);
+    }
+
+    /* hover pauses */
+    rail.addEventListener('mouseenter', function(){ hovering = true; syncPause(); });
+    rail.addEventListener('mouseleave', function(){ hovering = false; syncPause(); });
+
+    /* user scrolls (touch swipe / trackpad): follow along, restart the countdown */
+    var settle = null;
+    rail.addEventListener('scroll', function(){
+      if(anim) return;
+      clearTimeout(settle);
+      settle = setTimeout(function(){
+        var n = nearest();
+        if(n !== idx){ idx = n; paintDots(); rail.dispatchEvent(new CustomEvent('carousel:change', { detail:{ index:idx } })); }
+        restart();
+      }, 160);
+    }, { passive:true });
+
+    /* mouse drag */
+    var dragging = false, moved = false, startX = 0, startLeft = 0;
+    rail.addEventListener('pointerdown', function(e){
+      if(e.pointerType !== 'mouse' || e.button !== 0) return;
+      dragging = true; moved = false; startX = e.clientX; startLeft = rail.scrollLeft;
+      if(anim){ cancelAnimationFrame(anim); anim = null; }
+      rail.style.scrollSnapType = 'none';
+      syncPause();
+    });
+    window.addEventListener('pointermove', function(e){
+      if(!dragging) return;
+      var dx = e.clientX - startX;
+      if(Math.abs(dx) > 5) moved = true;
+      rail.scrollLeft = startLeft - dx;
+    });
+    window.addEventListener('pointerup', function(e){
+      if(!dragging) return;
+      dragging = false;
+      if(moved){
+        /* flick direction decides the neighbour, otherwise the nearest stop */
+        var dx = e.clientX - startX, n = nearest();
+        if(Math.abs(dx) > 60 && n === idx) n = idx + (dx < 0 ? 1 : -1);
+        go(Math.max(0, Math.min(stops.length - 1, n)));
+      } else {
+        rail.style.scrollSnapType = '';
+        syncPause();
+      }
+    });
+    /* a click (not a drag) steps towards the side the cursor arrow points to */
+    rail.addEventListener('click', function(e){
+      if(moved){ e.preventDefault(); moved = false; return; }
+      go(idx + (e.clientX < window.innerWidth / 2 ? -1 : 1));
+    });
+
+    /* only count down while visible */
+    new IntersectionObserver(function(entries){ inView = entries[0].isIntersecting; syncPause(); }, { threshold:.3 }).observe(rail);
+
+    measure();
+    rail.scrollLeft = stops[0];
+    restart();
+    window.addEventListener('resize', function(){ measure(); idx = Math.min(idx, stops.length - 1); rail.scrollLeft = stops[idx]; });
+  });
+})();
+
+/* ---------------- who we are: name badges ----------------
+   2s after the card scrolls in, each badge's lines rise out of their masks from a blur,
+   .12s apart (Daniel's a beat after Norbert's); once a badge's text has landed its
+   frosted plate (tint + backdrop blur) fades in behind it. */
+(function(){
+  var badges = [].slice.call(document.querySelectorAll('.wwa-card .name-badge'));
+  if(!badges.length) return;
+  var card = badges[0].closest('.wwa-card');
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    badges.forEach(function(b){ b.classList.add('is-bg'); });
+    return;
+  }
+  badges.forEach(function(b){ gsap.set(b.querySelectorAll('.nb-row > span'), { yPercent:115, filter:'blur(5px)' }); });
+  ScrollTrigger.create({
+    trigger: card, start:REVEAL_START, once:true,
+    onEnter: function(){
+      badges.forEach(function(b, i){
+        gsap.timeline({ delay:2 + i * .35 })
+          .to(b.querySelectorAll('.nb-row > span'), { yPercent:0, filter:'blur(0px)', duration:1, ease:'power4.out', stagger:.12, clearProps:'filter' })
+          .add(function(){ b.classList.add('is-bg'); }, '-=.35');
+      });
+    }
+  });
+})();
+
+/* ---------------- who we are: lounge zoom-out + portrait settle ---------------- */
+(function(){
+  var card = document.querySelector('.wwa-card');
+  if(!card || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var st = { trigger:card, start:'top bottom', end:'bottom top', scrub:1 };
+  gsap.fromTo(card.querySelector('.wwa-lounge'), { scale:1.25 }, { scale:1, ease:'none', scrollTrigger:st });
+  gsap.fromTo(card.querySelector('.wwa-portrait-inner'), { scale:1.05 }, { scale:1, ease:'none', scrollTrigger:st });
+})();
+
+/* ---------------- testimonials: staged entrance, replayed on every slide ----------------
+   1. the black panel opens from 0 width at its left edge (scaleX)
+   2. quote words rise out of their masks from a blur
+   3. the avatar opens from a 0-width sliver at its centre
+   4. author + logo come out of a blur
+   5. the quote mark is traced slowly (2.2s) with a 2px red stroke, fills red, the stroke fades
+   Cards that are not active sit in the start state (just the grey card). Plays on the
+   first card when the rail scrolls in, then on whichever card the carousel brings to
+   the front (reset while still sliding in); the card that left is reset after it's gone. */
+(function(){
+  var rail = document.getElementById('testiRail');
+  if(!rail) return;
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var cards = [].slice.call(rail.querySelectorAll('.testi-card'));
+  var parts = cards.map(function(card){
+    var path = card.querySelector('.quote-mark path');
+    return {
+      bg: card.querySelector('.testi-bg'),
+      words: splitWords(card.querySelector('.testi-text')),
+      avatar: card.querySelector('.testi-avatar'),
+      late: card.querySelectorAll('[data-testi-late]'),
+      path: path, len: path.getTotalLength(), tl: null
+    };
+  });
+  function finalState(p){
+    gsap.set(p.bg, { scaleX:1 });
+    gsap.set(p.words, { yPercent:0, clearProps:'filter' });
+    gsap.set(p.avatar, { scaleX:1, opacity:1 });
+    gsap.set(p.late, { opacity:1, y:0, clearProps:'filter' });
+    gsap.set(p.path, { strokeDasharray:p.len, strokeDashoffset:0, fillOpacity:1, strokeOpacity:0 });
+  }
+  /* start state: only the light grey card, nothing on it yet */
+  function reset(p){
+    if(p.tl){ p.tl.kill(); p.tl = null; }
+    gsap.set(p.bg, { scaleX:0 });
+    gsap.set(p.words, { yPercent:125, filter:'blur(5px)' });
+    gsap.set(p.avatar, { scaleX:0, opacity:0 });
+    gsap.set(p.late, { opacity:0, y:14, filter:'blur(5px)' });
+    gsap.set(p.path, { strokeDasharray:p.len, strokeDashoffset:p.len, fillOpacity:0, strokeOpacity:1 });
+  }
+  function play(i, delay){
+    var p = parts[i];
+    if(!p) return;
+    reset(p);
+    p.tl = gsap.timeline({ delay:delay || 0 })
+      .to(p.bg, { scaleX:1, duration:.9, ease:'power3.inOut' }, 0)
+      .to(p.words, { yPercent:0, filter:'blur(0px)', duration:1.2, ease:'power4.out', stagger:Math.min(.07, 1.4 / p.words.length), clearProps:'filter' }, .45)
+      .to(p.avatar, { scaleX:1, opacity:1, duration:1, ease:'power2.inOut' }, .55)
+      .to(p.late, { opacity:1, y:0, filter:'blur(0px)', duration:.9, ease:'power3.out', stagger:.12, clearProps:'filter' }, .9)
+      .to(p.path, { strokeDashoffset:0, duration:2.2, ease:'power2.inOut' }, 1.15)
+      .to(p.path, { fillOpacity:1, duration:.8, ease:'power2.out' }, 3.1)
+      .to(p.path, { strokeOpacity:0, duration:.5 }, 3.6);
+  }
+  if(reduce){ parts.forEach(finalState); return; }
+  /* every card waits in its start state; only the active one plays. The card that just
+     left is reset once it has slid out of view (the slide takes ~.9s). */
+  parts.forEach(reset);
+  var active = 0;
+  ScrollTrigger.create({
+    trigger: rail, start:REVEAL_START, once:true,
+    onEnter: function(){ play(0, REVEAL_DELAY); }
+  });
+  rail.addEventListener('carousel:change', function(e){
+    var prev = parts[active];
+    active = e.detail.index;
+    play(active, .15);
+    if(prev && prev !== parts[active]) gsap.delayedCall(1, function(){ if(prev !== parts[active]) reset(prev); });
+  });
+})();
+
+/* ---------------- how we work: rotating frames + parallax ----------------
+   each frame shows its data-rotate list; every ROTATE seconds the next shot is laid on
+   top and dissolves in from a 16px blur and 106% over 2.2s (as on the reference cards). The lower
+   frame runs data-rotate-offset seconds behind the upper one. Rotation only runs while
+   the frame is on screen. The 130%-tall layer inside lags the scroll by up to 11% either way. */
+(function(){
+  var ROTATE = 4.5, IN = 2.2;
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.querySelectorAll('.hww-frame[data-rotate]').forEach(function(frame){
+    var layer = frame.querySelector('.hww-layer');
+    var ids = frame.getAttribute('data-rotate').split(',');
+    var slides = ids.map(function(n, i){
+      var img = document.createElement('img');
+      img.className = 'hww-slide' + (i === 0 ? ' is-first' : '');
+      img.src = 'assets/Hottinger-' + n.trim() + '.jpg';
+      img.srcset = 'assets/Hottinger-' + n.trim() + '.jpg 1x, assets/Hottinger-' + n.trim() + '@2x.jpg 2x';
+      img.alt = ''; img.loading = 'lazy';
+      layer.appendChild(img);
+      return img;
+    });
+    if(reduce) return;
+
+    gsap.fromTo(layer, { yPercent:-11 }, { yPercent:11, ease:'none',
+      scrollTrigger:{ trigger:frame, start:'top bottom', end:'bottom top', scrub:true } });
+
+    var idx = 0, z = 1, timer = null, visible = false;
+    function next(){
+      idx = (idx + 1) % slides.length;
+      var el = slides[idx];
+      el.style.zIndex = ++z;
+      gsap.fromTo(el, { opacity:0, filter:'blur(16px)', scale:1.06 },
+        { opacity:1, filter:'blur(0px)', scale:1, duration:IN, ease:'power2.inOut', overwrite:true });
+      timer = gsap.delayedCall(ROTATE, next);
+      if(!visible) timer.pause();
+    }
+    timer = gsap.delayedCall(ROTATE + parseFloat(frame.getAttribute('data-rotate-offset') || 0), next);
+    timer.pause();
+    new IntersectionObserver(function(entries){
+      visible = entries[0].isIntersecting;
+      visible ? timer.resume() : timer.pause();
+    }).observe(frame);
+  });
+})();
+
+/* ---------------- slide in from the right ----------------
+   each card glides in from the right, one after another, fading in on the way.
+   default (reference rail): long, gentle sine in-out.
+   data-slide-in="quick" (service cards): shorter trip on a decelerating power3.out.
+   Transitions are parked during the tween and transforms cleared afterwards so the
+   cards' own CSS hover transforms keep working. */
+(function(){
+  var groups = [];
+  document.querySelectorAll('[data-slide-in]').forEach(function(el){
+    var g = groups.filter(function(x){ return x.parent === el.parentElement; })[0];
+    if(!g){ g = { parent:el.parentElement, items:[] }; groups.push(g); }
+    g.items.push(el);
+  });
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  groups.forEach(function(g){
+    if(reduce){ gsap.set(g.items, { opacity:1 }); return; }
+    ScrollTrigger.create({
+      trigger: g.parent, start:REVEAL_START, once:true,
+      onEnter: function(){
+        g.items.forEach(function(el){ el.style.transition = 'none'; });
+        var quick = g.items[0].getAttribute('data-slide-in') === 'quick';
+        var o = quick
+          ? { dist:.18, min:160, dur:1.3, ease:'power3.out', stagger:.22, fade:.8 }
+          : { dist:.35, min:260, dur:2.4, ease:'sine.inOut', stagger:.22, fade:1.4 };
+        gsap.fromTo(g.items, { x: function(){ return Math.max(window.innerWidth * o.dist, o.min); } },
+          { x:0, duration:o.dur, ease:o.ease, stagger:o.stagger, delay:REVEAL_DELAY,
+            onComplete: function(){
+              g.items.forEach(function(el){ el.style.transition = ''; });
+              gsap.set(g.items, { clearProps:'transform' });
+            } });
+        gsap.to(g.items, { opacity:1, duration:o.fade, ease:'sine.out', stagger:o.stagger, delay:REVEAL_DELAY });
+      }
+    });
+  });
+})();
+
+/* ---------------- image reveal (bb-b.net style) ----------------
+   cover colour = nearest ancestor background, so the wipe blends into grey panels
+   and white sections alike; the cover is removed once off-screen so hover effects
+   underneath are untouched. */
+(function(){
+  var els = gsap.utils.toArray('[data-img-reveal]');
+  if(!els.length) return;
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function surroundingBg(el){
+    for(var p = el.parentElement; p; p = p.parentElement){
+      var bg = getComputedStyle(p).backgroundColor;
+      if(bg && bg !== 'transparent' && !/rgba\(.*,\s*0\)$/.test(bg)) return bg;
+    }
+    return '#fff';
+  }
+
+  els.forEach(function(el){
+    var wipeOnly = el.getAttribute('data-img-reveal') === 'cover';
+    if(reduce){ gsap.set(el, { opacity:1, y:0 }); return; }
+    var cover = document.createElement('div');
+    cover.className = 'img-reveal-cover';
+    cover.style.background = surroundingBg(el);
+    el.appendChild(cover);
+
+    ScrollTrigger.create({
+      trigger: el, start:REVEAL_START, once:true,
+      onEnter: function(){
+        gsap.to(cover, { yPercent:100, duration:1, ease:'power3.inOut', delay:REVEAL_DELAY, onComplete:function(){ cover.remove(); } });
+        if(!wipeOnly) gsap.to(el, { y:0, opacity:1, duration:.6, ease:'power2.out', delay:.2 + REVEAL_DELAY });
+      }
+    });
+  });
+})();
+
+/* ---------------- service cards: counter-parallax hover ----------------
+   pointer position -> nx/ny in [-1,1]. The media layer eases toward the opposite
+   offset (lerp = the lag) and scales up as the pointer approaches an edge; title and
+   icon drift a little the same way as the pointer. A rAF loop runs only while a card
+   is hovered or still settling, so idle cards cost nothing. */
+(function(){
+  if(!window.matchMedia('(hover:hover) and (pointer:fine)').matches) return;
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var SHIFT = 14;          /* px the image travels at the edges */
+  var BASE = 1.08, EDGE = .07; /* scale on hover, extra scale at the edges */
+  var LERP = .09;
+
+  document.querySelectorAll('.service-card').forEach(function(card){
+    var media = card.querySelector('.service-card-media');
+    var title = card.querySelector('h4');
+    var icon = card.querySelector('.icon');
+    var cur = { x:0, y:0, s:1, c:0 }, tgt = { x:0, y:0, s:1, c:0 };
+    var running = false;
+
+    function frame(){
+      cur.x += (tgt.x - cur.x) * LERP;
+      cur.y += (tgt.y - cur.y) * LERP;
+      cur.s += (tgt.s - cur.s) * LERP;
+      cur.c += (tgt.c - cur.c) * LERP;
+      media.style.transform = 'translate3d(' + (-cur.x * SHIFT) + 'px,' + (-cur.y * SHIFT) + 'px,0) scale(' + cur.s + ')';
+      var t = 'translate3d(' + (cur.x * 6 * cur.c) + 'px,' + (cur.y * 6 * cur.c) + 'px,0)';
+      title.style.transform = t; icon.style.transform = t;
+      var settled = Math.abs(tgt.x - cur.x) < .001 && Math.abs(tgt.y - cur.y) < .001 && Math.abs(tgt.s - cur.s) < .0005;
+      if(settled && !card.matches(':hover')){ running = false; return; }
+      requestAnimationFrame(frame);
+    }
+    function start(){ if(!running){ running = true; requestAnimationFrame(frame); } }
+
+    card.addEventListener('pointermove', function(e){
+      var r = card.getBoundingClientRect();
+      var px = (e.clientX - r.left) / r.width, py = (e.clientY - r.top) / r.height;
+      tgt.x = px * 2 - 1; tgt.y = py * 2 - 1;
+      tgt.s = BASE + EDGE * Math.max(Math.abs(tgt.x), Math.abs(tgt.y));
+      tgt.c = 1;
+      card.style.setProperty('--mx', (px * 100) + '%');
+      card.style.setProperty('--my', (py * 100) + '%');
+      start();
+    });
+    card.addEventListener('pointerleave', function(){
+      tgt.x = 0; tgt.y = 0; tgt.s = 1; tgt.c = 0;
+      start();
+    });
+  });
+})();
+
+/* ---------------- awards wall: arced columns spinning with the scroll ----------------
+   the columns are flow content inside the panel and are additionally pushed up by JS,
+   so they run SPEED x faster than the page and whip through the arc. Each frame (only
+   while the panel is on screen) every visible item's distance d from the viewport's
+   vertical centre gives, after moto-card's vertex shader:
+     nd   = min(d / (vh/2), 1)
+     arc  = sqrt(max(0, BULGE - nd^2))                     -> the ")(" curve
+     push = d < 1.4*step ? .5 * (1 + cos(PI * d / (1.4*step))) : 0  -> middle item nudged in
+     x    = A*arc + PUSH*push, anchored so the middle item sits on the column's inner edge
+     s    = MIN + (1 - MIN)*(1 - nd) + (CENTER - 1)*push
+   Shine: a diagonal grey/white/grey gradient fixed to the screen shows through the
+   text (background-clip:text). Item box at (L,T), transform-origin (ox,oy), scale s:
+   local point u lands on screen at a + s*u with a = L + x + ox*(1 - s), so the
+   background is sized viewport/s and offset by -a/s.
+   moto-card defines the gradient in normalised screen space (t = .5 + dot(uv - .5, dir),
+   dir from 231deg; its stops are grey .30 / white .48 / grey .66, ours tighter). CSS angles and stops work in
+   pixels, so shineGradient() converts: pixel normal = (dir.x/W, dir.y/H), and a stop at
+   t sits at .5 + (t - .5) * |normal| * L along a CSS gradient line of length L.
+   The band therefore runs top-left -> centre -> bottom-right exactly as on moto-card:
+   the left column lights up near the top, the right column near the bottom.
+   Arc depth is capped so the outermost items never leave the panel. */
+(function(){
+  var wall = document.getElementById('awards-wall');
+  if(!wall || wall.closest('[hidden]')) return;   /* section is parked (hidden) */
+  var lists = [].slice.call(wall.querySelectorAll('.aw-list'));
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var BULGE = 1.35, MIN = .72, CENTER = 1.3, SPEED = 2.3;
+  var GREY = '#bcc0ca', STOPS = [.40, .48, .56], DEG = 231; /* moto uses .30/.48/.66; tighter = crisper glint */
+
+  var cols = lists.map(function(list, i){
+    return { list:list, track:list.parentElement, dir: i === 0 ? 1 : -1, base:list.innerHTML };
+  });
+  var vw, vh, step, A, PUSH, maxShift, range, extra;
+
+  function build(){
+    range = wall.offsetHeight + window.innerHeight;          /* scroll length while on screen */
+    extra = range * (SPEED - 1);                             /* JS travel on top of the page's */
+    cols.forEach(function(c){
+      c.list.innerHTML = c.base;
+      var setH = c.list.offsetHeight;
+      var n = Math.max(1, Math.ceil((wall.offsetHeight + extra + setH) / setH));
+      c.list.innerHTML = new Array(n + 1).join(c.base);
+      c.items = [].slice.call(c.list.children);
+      c.items.forEach(function(li, i){ if(i >= 9) li.setAttribute('aria-hidden', 'true'); });
+    });
+  }
+  function shineGradient(){
+    var a = DEG * Math.PI / 180;
+    var dx = -Math.sin(a), dy = -Math.cos(a);           /* moto: dir = (sin, cos), y up -> flip */
+    var nx = -dx / vw, ny = dy / vh;                      /* d t / d pixel, screen y down */
+    /* CSS: 0deg = up, clockwise; direction vector (sin, -cos) */
+    var deg = Math.atan2(nx, -ny) * 180 / Math.PI; if(deg < 0) deg += 360;
+    var r = deg * Math.PI / 180;
+    var L = Math.abs(vw * Math.sin(r)) + Math.abs(vh * Math.cos(r));
+    var k = Math.sqrt(nx * nx + ny * ny) * L;
+    var pos = STOPS.map(function(t){ return ((.5 + (t - .5) * k) * 100).toFixed(2) + '%'; });
+    return 'linear-gradient(' + deg.toFixed(2) + 'deg, ' + GREY + ' ' + pos[0] + ', #ffffff ' + pos[1] + ', ' + GREY + ' ' + pos[2] + ')';
+  }
+  function measure(){
+    vw = window.innerWidth; vh = window.innerHeight;
+    step = cols[0].items[0].offsetHeight;
+    PUSH = Math.min(vw * .05, 72);
+    A = Math.min(vw * .26, 400);
+    var W = wall.clientWidth, EDGE = 16, reach = Math.sqrt(BULGE) - Math.sqrt(BULGE - 1);
+    cols.forEach(function(c){
+      c.left = c.items.map(function(li){ return c.track.offsetLeft + li.offsetLeft; });
+      c.w = c.items.map(function(li){ return li.offsetWidth; });
+      c.ox = c.items.map(function(li, i){ return c.dir > 0 ? c.w[i] : 0; }); /* inner edge */
+      c.top = c.items.map(function(li){ return li.offsetTop; }); /* relative to the track */
+      /* outermost excursion = A*reach + PUSH, minus what the edge-scale pulls back in */
+      for(var i = 0; i < 9; i++){
+        var space = c.dir > 0 ? c.left[i] - EDGE : W - EDGE - (c.left[i] + c.w[i]);
+        A = Math.min(A, Math.max(0, (space - PUSH + c.w[i] * (1 - MIN)) / reach));
+      }
+    });
+    maxShift = A * Math.sqrt(BULGE) + PUSH;
+    wall.style.setProperty('--aw-shine', shineGradient());
+  }
+
+  function render(p){
+    var r = wall.getBoundingClientRect();
+    var lift = -p * extra;
+    cols.forEach(function(c){
+      c.list.style.transform = 'translate3d(0,' + lift.toFixed(1) + 'px,0)';
+      for(var i = 0; i < c.items.length; i++){
+        var top = r.top + lift + c.top[i];                  /* item box top on screen */
+        if(top < -step * 1.5 || top > vh + step * .5) continue;
+        var li = c.items[i];
+        var d = Math.abs(top + step / 2 - vh / 2);
+        var nd = Math.min(d / (vh / 2), 1);
+        var arc = Math.sqrt(Math.max(0, BULGE - nd * nd));
+        var t = d / (step * 1.4);
+        var push = t < 1 ? .5 * (1 + Math.cos(Math.PI * t)) : 0;
+        var x = c.dir * (A * arc + PUSH * push - maxShift);
+        var sc = MIN + (1 - MIN) * (1 - nd) + (CENTER - 1) * push;
+        li.style.transform = 'translate3d(' + x.toFixed(1) + 'px,0,0) scale(' + sc.toFixed(4) + ')';
+        var ax = r.left + c.left[i] + x + c.ox[i] * (1 - sc);
+        var ay = top + (step / 2) * (1 - sc);
+        li.style.backgroundSize = (vw / sc).toFixed(1) + 'px ' + (vh / sc).toFixed(1) + 'px';
+        li.style.backgroundPosition = (-ax / sc).toFixed(1) + 'px ' + (-ay / sc).toFixed(1) + 'px';
+      }
+    });
+  }
+
+  var st;
+  build();
+  measure();
+  wall.classList.add('aw-shine');
+  render(reduce ? .5 : 0);
+  st = ScrollTrigger.create({
+    trigger: wall, start:'top bottom', end:'bottom top',
+    onRefresh: function(self){ build(); measure(); render(reduce ? .5 : self.progress); }
+  });
+  if(!reduce) gsap.ticker.add(function(){ if(st.isActive) render(st.progress); });
+  window.addEventListener('resize', function(){ measure(); render(reduce ? .5 : st.progress); });
+
+  /* lines under the title: each rises 110% out of a 5px blur, .1s apart, .8s each
+     (moto-card's .numbers_list timeline) */
+  wall.querySelectorAll('[data-lines-in]').forEach(function(el){
+    var lines = el.querySelectorAll('.aw-line');
+    if(reduce){ gsap.set(lines, { opacity:1, filter:'none', y:0 }); return; }
+    gsap.set(lines, { y:0, yPercent:110 });
+    ScrollTrigger.create({
+      trigger: el, start:REVEAL_START, once:true,
+      onEnter: function(){ gsap.to(lines, { yPercent:0, opacity:1, filter:'blur(0px)', duration:.8, stagger:.1, delay:REVEAL_DELAY }); }
+    });
+  });
+})();
+
+/* ---------------- floating contact dock ----------------
+   hidden until the page is scrolled past 40px, then a ball drops onto the dock's
+   baseline, bounces twice, rolls left->right revealing the pill via clip-path, and
+   stretches into the button. Geometry is re-measured every frame so resizes don't
+   derail it. Reduced-motion users just get a fade. */
+(function(){
+  var dock = document.getElementById('contactDock');
+  if(!dock) return;
+  var btn = dock.querySelector('.mm-dock-btn');
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var armed = true;
+
+  function show(){
+    dock.classList.remove('is-pending');
+    setTimeout(function(){ dock.classList.remove('no-anim'); }, 60);
+  }
+  function onScroll(){
+    if(!armed || (window.pageYOffset || 0) <= 40) return;
+    armed = false;
+    window.removeEventListener('scroll', onScroll);
+    if(reduce){ dock.classList.remove('no-anim'); dock.classList.remove('is-pending'); return; }
+    try{ ballDrop(); }catch(e){ show(); }
+  }
+  window.addEventListener('scroll', onScroll, { passive:true });
+
+  /* hide while the footer (contact) is on screen — the button would point at itself */
+  if('IntersectionObserver' in window){
+    var footer = document.getElementById('contact');
+    footer && new IntersectionObserver(function(entries){
+      dock.classList.toggle('is-hidden', entries[0].isIntersecting);
+    }, { rootMargin:'0px 0px -8% 0px' }).observe(footer);
+  }
+
+  function ballDrop(){
+    var ball = document.createElement('div');
+    ball.id = 'mm-dock-ball';
+    document.body.appendChild(ball);
+    btn.classList.add('is-label-hidden');
+
+    dock.classList.remove('is-pending');
+    dock.style.clipPath = 'inset(0 100% 0 0 round 999px)';
+
+    var SIZE = Math.round(btn.getBoundingClientRect().height), R = SIZE / 2;
+    function geo(){
+      var dr = dock.getBoundingClientRect(), br = btn.getBoundingClientRect();
+      return { dr:dr, br:br, cy:dr.top + dr.height/2, x0:dr.left + 7 + R, xc:dr.left + dr.width/2, xEnd:br.right - R };
+    }
+    function place(x, y, sx, sy){
+      ball.style.transform = 'translate(' + (x - R) + 'px,' + (y - R) + 'px) scale(' + (sx || 1) + ',' + (sy || 1) + ')';
+    }
+    ball.style.width = ball.style.height = SIZE + 'px';
+
+    /* fall + bounce: fixed 1/120s physics steps so it runs the same at any frame rate */
+    var G = geo();
+    var GRAVITY = 5200, RESTITUTION = .42, STEP = 1/120;
+    var h0 = Math.min(420, G.cy - 80), y0 = G.cy - h0;
+    var x = G.xc, y = y0, vx = 0, vy = 0, bounces = 0, acc = 0, last = null, squash = 0;
+    var prevTop = G.dr.top, prevLeft = G.dr.left;
+
+    function fall(ts){
+      if(last === null) last = ts;
+      acc += Math.min(.1, (ts - last) / 1000); last = ts;
+      G = geo();
+      var dTop = G.dr.top - prevTop;
+      y += dTop; y0 += dTop; x += G.dr.left - prevLeft;
+      prevTop = G.dr.top; prevLeft = G.dr.left;
+      ball.style.opacity = Math.min(1, Math.max(0, (y - y0) / (h0 * .72)));
+
+      var landed = false, hit = false;
+      while(acc >= STEP){
+        acc -= STEP;
+        vy += GRAVITY * STEP; y += vy * STEP; x += vx * STEP;
+        if(y >= G.cy){
+          y = G.cy; bounces++;
+          if(bounces === 1){
+            vy = -vy * RESTITUTION;
+            vx = (G.x0 - x) / (2 * Math.abs(vy) / GRAVITY); /* drift so the 2nd landing is at the left end */
+            hit = true;
+          }else if(bounces === 2 && Math.abs(vy) * RESTITUTION >= 140){
+            x = G.x0; vx = 0; vy = -vy * RESTITUTION;
+            hit = true;
+          }else{ landed = true; break; }
+        }
+      }
+      if(landed){ place(G.x0, G.cy); roll(); return; }
+      if(hit) squash = 3;
+      if(squash > 0){ squash--; place(x, y, 1.06, .94); } else place(x, y);
+      requestAnimationFrame(fall);
+    }
+
+    /* roll left->right, uncovering the pill behind the ball */
+    function roll(){
+      var DUR = 480, start = null;
+      function tick(ts){
+        if(start === null) start = ts;
+        var t = Math.min(1, (ts - start) / DUR);
+        var p = t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3) / 2;
+        G = geo();
+        var bx = G.x0 + (G.xEnd - G.x0) * p;
+        place(bx, G.cy);
+        dock.style.clipPath = 'inset(0 ' + Math.max(0, G.dr.right - (bx + R)) + 'px 0 0 round 999px)';
+        if(t < 1) requestAnimationFrame(tick); else morph();
+      }
+      requestAnimationFrame(tick);
+    }
+
+    /* stretch the ball leftwards into the button's full width */
+    function morph(){
+      dock.style.clipPath = 'none';
+      var DUR = 220, start = null;
+      function tick(ts){
+        if(start === null) start = ts;
+        var t = Math.min(1, (ts - start) / DUR);
+        var p = 1 - Math.pow(1 - t, 3);
+        G = geo();
+        var w = SIZE + (G.br.width - SIZE) * p;
+        ball.style.width = w + 'px';
+        ball.style.transform = 'translate(' + (G.br.right - w) + 'px,' + (G.cy - R) + 'px)';
+        if(t < 1) requestAnimationFrame(tick); else finish();
+      }
+      requestAnimationFrame(tick);
+    }
+
+    function finish(){
+      btn.classList.add('is-fading-in');
+      btn.classList.remove('is-label-hidden');
+      requestAnimationFrame(function(){ requestAnimationFrame(function(){ btn.classList.remove('is-fading-in'); }); });
+      setTimeout(function(){
+        ball.remove();
+        dock.style.clipPath = '';
+        dock.classList.remove('no-anim');
+      }, 160);
+    }
+
+    requestAnimationFrame(fall);
+  }
+})();
+
+/* ---------------- mobile menu ---------------- */
+var burger = document.getElementById('burger');
+var menu = document.getElementById('mobileMenu');
+function closeMenu(){ burger.classList.remove('is-open'); menu.classList.remove('is-open'); }
+burger.addEventListener('click', function(){
+  burger.classList.toggle('is-open');
+  menu.classList.toggle('is-open');
+});
+
+/* ---------------- hero entrance ----------------
+   timings from stodio.webflow.io's page-load interactions:
+   - background image 1.4 -> 1 over 2s, outQuint (GSAP power4.out)
+   - mockup 1.2 -> 1 over 1.5s, outQuad (power1.out), fading in
+   - each text block: opacity 0, 50px low, blur 5px -> settled over 1.2s, outQuart
+     (power3.out), staggered .2 / .3 / .4 / .5s
+   the red stroke draws once the headline has mostly landed. */
+var HERO_TEXT = { opacity:1, y:0, filter:'blur(0px)', duration:1.2, ease:'power3.out' };
+/* split [data-split] headings into masked words (non-text children such as the hero
+   stroke <img> are left in place). Words start 110% low and blurred 5px. The hero
+   headline is played by the entrance timeline; the rest play, a touch quicker, when
+   scrolled into view. */
+/* clearProps: a leftover filter (even blur(0px)) makes the browser clip each word to its
+   own box, which chops off descenders like the g in "grade" */
+var WORD_IN = { yPercent:0, filter:'blur(0px)', duration:1.2, ease:'power4.out', stagger:.11, clearProps:'filter' };
+var WORD_IN_SECTION = { yPercent:0, filter:'blur(0px)', duration:1.2, ease:'power4.out', stagger:.07, delay:REVEAL_DELAY, clearProps:'filter' };
+function splitWords(h){
+  h.setAttribute('aria-label', h.textContent.replace(/\s+/g, ' ').trim());
+  [].slice.call(h.childNodes).forEach(function(node){
+    if(node.nodeType !== 3 || !node.textContent.trim()) return;
+    var frag = document.createDocumentFragment();
+    node.textContent.trim().split(/\s+/).forEach(function(w, i){
+      if(i) frag.appendChild(document.createTextNode(' '));
+      var mask = document.createElement('span'); mask.className = 'word-mask'; mask.setAttribute('aria-hidden', 'true');
+      var word = document.createElement('span'); word.className = 'word'; word.textContent = w;
+      mask.appendChild(word); frag.appendChild(mask);
+    });
+    h.replaceChild(frag, node);
+  });
+  var words = h.querySelectorAll('.word');
+  gsap.set(words, { yPercent:125, filter:'blur(5px)' }); /* 125%: clears the mask's descender room */
+  h.classList.add('is-split');
+  return words;
+}
+document.querySelectorAll('[data-split]').forEach(function(h){
+  var words = splitWords(h);
+  if(h.closest('.hero')) return;
+  var lead = h.previousElementSibling;
+  if(lead && lead.hasAttribute('data-split-lead')) words = [].slice.call(splitWords(lead)).concat([].slice.call(words));
+  /* long texts (e.g. testimonial quotes) keep the total cascade near .07 * 20 words */
+  var vars = Object.assign({}, WORD_IN_SECTION, { stagger: Math.min(.07, 1.4 / words.length) });
+  ScrollTrigger.create({
+    trigger: h, start:REVEAL_START, once:true,
+    onEnter: function(){ gsap.to(words, vars); }
+  });
+});
+gsap.timeline({ delay:.1 })
+  .to('#heroParallax img', { scale:1, duration:2, ease:'power4.out' }, 0)
+  .to('.hero-eyebrow', HERO_TEXT, .2)
+  .to('.hero-headline .word', WORD_IN, .3)
+  .to('.hero-desc', HERO_TEXT, .4)
+  .to('.hero .header-cta', HERO_TEXT, .5)
+  .to('.hero-mock', { opacity:1, scale:1, filter:'blur(0px)', duration:1.5, ease:'power1.out' }, .3)
+  .to('#heroStroke', { clipPath:'inset(0 0% 0 0)', duration:.9, ease:'power2.inOut' }, 1.1)
+  .to('.clients-bar', { opacity:1, y:0, duration:1.2, ease:'power3.out' }, .8);
+
+/* ---------------- generic scroll reveals ---------------- */
+gsap.utils.toArray('[data-reveal]').forEach(function(el){
+  if(el.closest('.hero')) return; /* hero handled by entrance timeline */
+  gsap.to(el, {
+    opacity:1, y:0, duration:1, ease:'power3.out', delay:REVEAL_DELAY,
+    scrollTrigger: { trigger: el, start:REVEAL_START, toggleActions:'play none none none' }
+  });
+});
+
+/* stagger children inside grids */
+gsap.utils.toArray('[data-stagger]').forEach(function(group){
+  var items = group.querySelectorAll(':scope > [data-reveal]');
+  if(!items.length) return;
+  gsap.to(items, {
+    opacity:1, y:0, duration:.9, ease:'power3.out', stagger:0.12, delay:REVEAL_DELAY,
+    scrollTrigger: { trigger: group, start:REVEAL_START, toggleActions:'play none none none' }
+  });
+});
+
+/* ---------------- hero parallax ----------------
+   the background lags by 35% of its height while the hero scrolls out, the mockup by
+   20%, so the two layers separate (pace after bramvanvugt.com); soon after
+   scrolling starts the hero text softens (blur) while the whole frame darkens */
+gsap.to('#heroParallax', {
+  yPercent: 35, ease:'none',
+  scrollTrigger: { trigger:'.hero', start:'top top', end:'bottom top', scrub:true }
+});
+gsap.timeline({ scrollTrigger: { trigger:'.hero', start:'10% top', end:'75% top', scrub:true } })
+  .to('.hero-text', { filter:'blur(6px)', ease:'none' }, 0)
+  .to('.hero-shade', { opacity:.5, ease:'none' }, 0);
+gsap.to('#heroMock', {
+  yPercent: 20, ease:'none',
+  scrollTrigger: { trigger:'.hero', start:'top top', end:'bottom top', scrub:true }
+});
+
+/* ---------------- stats: blur-rise entrance + odometer digits ----------------
+   timings lifted from stodio.webflow.io: items rise 50px over 1.2s (outQuart) while
+   a 5px blur clears over .6s, staggered 0/.2/.3/.4s; every digit reel spins for 3s
+   on an in-out-quart curve, alternate reels spinning in opposite directions. Each reel
+   starts and ends on its final digit, so the number reads correctly before and after. */
+(function(){
+  var stats = document.querySelector('.stats');
+  if(!stats) return;
+  var items = gsap.utils.toArray('.stats > div');
+  var reels = [];
+
+  stats.querySelectorAll('.odo').forEach(function(el){
+    var html = '';
+    el.getAttribute('data-value').split('').forEach(function(d){
+      var glyphs = [d,1,2,3,4,5,6,7,8,d].map(function(g){ return '<span>' + g + '</span>'; }).join('');
+      html += '<span class="odo-digit" aria-hidden="true"><span class="odo-sizer">' + d + '</span><span class="odo-reel">' + glyphs + '</span></span>';
+    });
+    el.innerHTML = html;
+    el.querySelectorAll('.odo-reel').forEach(function(reel, i){
+      var down = i % 2 === 1;
+      gsap.set(reel, { yPercent: down ? -90 : 0 });
+      reels.push({ el:reel, to: down ? 0 : -90 });
+    });
+  });
+
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    gsap.set(items, { opacity:1, y:0, filter:'blur(0px)' });
+    return;
+  }
+
+  var DELAYS = [0, .2, .3, .4];
+  ScrollTrigger.create({
+    trigger: stats, start:REVEAL_START, once:true,
+    onEnter: function(){
+      items.forEach(function(item, i){
+        var d = (DELAYS[i] != null ? DELAYS[i] : i * .1) + REVEAL_DELAY;
+        gsap.to(item, { y:0, opacity:1, duration:1.2, ease:'power4.out', delay:d });
+        gsap.to(item, { filter:'blur(0px)', duration:.6, ease:'power1.out', delay:d });
+      });
+      reels.forEach(function(r){
+        gsap.to(r.el, { yPercent:r.to, duration:3, ease:'power3.inOut', delay:REVEAL_DELAY });
+      });
+    }
+  });
+})();
+
+/* ---------------- pagination dots follow rail scroll ---------------- */
+function wireDots(railId, dotsSelector){
+  var rail = document.getElementById(railId);
+  if(!rail) return;
+  var dots = document.querySelectorAll(dotsSelector);
+  if(!dots.length) return;
+  rail.addEventListener('scroll', function(){
+    var ratio = rail.scrollLeft / Math.max(1, (rail.scrollWidth - rail.clientWidth));
+    var idx = Math.min(dots.length-1, Math.round(ratio * (dots.length-1)));
+    dots.forEach(function(d,i){ d.classList.toggle('is-active', i===idx); });
+  }, { passive:true });
+}
+if(!document.getElementById('references').classList.contains('refs-pinned')){
+  wireDots('refsRail', '.refs-nav .dots i');
+}
+
+/* duplicate marquee content for seamless loop; duration is derived from the real
+   width so the speed stays constant however many / however large the logos are */
+var track = document.getElementById('marqueeTrack');
+if(track){
+  track.innerHTML += track.innerHTML;
+  var MARQUEE_SPEED = 70; /* px per second */
+  var setMarqueeDuration = function(){
+    track.style.animationDuration = (track.scrollWidth / 2 / MARQUEE_SPEED) + 's';
+  };
+  setMarqueeDuration();
+  window.addEventListener('load', setMarqueeDuration);
+  window.addEventListener('resize', setMarqueeDuration);
+}
+</script>
+</body>
+</html>
